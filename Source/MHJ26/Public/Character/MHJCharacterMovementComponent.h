@@ -16,11 +16,11 @@ class MHJ26_API UMHJCharacterMovementComponent : public UCharacterMovementCompon
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Movement: Walking")
-	bool bCanRun;
+	uint8 bCanRun:1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Movement: Walking", meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
 	float MaxRunSpeed;
 	
-private:
+	UPROPERTY(BlueprintReadOnly, Category="Character Movement: Walking", meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
 	uint8 bRunning:1;
 	
 public:
