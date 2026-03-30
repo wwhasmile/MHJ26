@@ -14,4 +14,25 @@ class MHJ26_API UMHJCharacterMovementComponent : public UCharacterMovementCompon
 {
 	GENERATED_BODY()
 	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Movement: Walking")
+	bool bCanRun;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Movement: Walking", meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
+	float MaxRunSpeed;
+	
+private:
+	uint8 bRunning:1;
+	
+public:
+	UMHJCharacterMovementComponent();
+	
+	UFUNCTION(BlueprintCallable, Category="Character Movement: Walking")
+	void StartRunning();
+	UFUNCTION(BlueprintCallable, Category="Character Movement: Walking")
+	void StopRunning();
+	
+	FORCEINLINE bool IsRunning() const { return bCanRun && bRunning; }
+	
+	virtual float GetMaxSpeed() const override;
+	
 };
