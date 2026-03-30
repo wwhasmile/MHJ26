@@ -14,7 +14,7 @@ class MHJ26_API AMHJCharacter : public ACharacter
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = true))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Movement", meta=(AllowPrivateAccess=true))
 	TObjectPtr<UMHJCharacterMovementComponent> MHJCharacterMovement;
 
 public:
