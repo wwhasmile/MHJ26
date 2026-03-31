@@ -94,6 +94,7 @@ void AMHJPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMHJPlayerCharacter::Move);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Started, this, &AMHJPlayerCharacter::StartRunning);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &AMHJPlayerCharacter::StopRunning);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AMHJPlayerCharacter::Interact);
 	}
 }
 
@@ -134,5 +135,13 @@ void AMHJPlayerCharacter::StopRunning(const FInputActionValue& Value)
 	if (UMHJCharacterMovementComponent* MovementComponent = GetCharacterMovement<UMHJCharacterMovementComponent>())
 	{
 		MovementComponent->StopRunning();
+	}
+}
+
+void AMHJPlayerCharacter::Interact(const FInputActionValue& Value)
+{
+	if (FirstPersonInteraction)
+	{
+		FirstPersonInteraction->Interact();
 	}
 }

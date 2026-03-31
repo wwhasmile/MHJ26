@@ -90,4 +90,7 @@ private:
 	UFUNCTION()
 	void StopRunning(const FInputActionValue& Value);
 	
+	UFUNCTION()
+	void Interact(const FInputActionValue& Value);
+	
 };
