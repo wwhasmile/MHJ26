@@ -6,6 +6,9 @@
 #include "Components/SceneComponent.h"
 #include "MHJInteractionComponent.generated.h"
 
+class IMHJInteractable;
+class UPrimitiveComponent;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MHJ26_API UMHJInteractionComponent : public USceneComponent
 {
@@ -17,23 +20,24 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Arm")
 	float ArmRadius;
 	
+private:
+	TScriptInterface<IMHJInteractable> CurrentInteractable;
+	
 public:
 	UMHJInteractionComponent();
 	
-	UFUNCTION(BlueprintPure, Category="Interaction")
-	bool IsFacingInteractable() const;
-	UFUNCTION(BlueprintPure, Category="Interaction")
-	bool CanInteract(AActor* Instigator) const;
-	UFUNCTION(BlueprintPure, Category="Interaction")
-	FText GetInteractionPrompt(AActor* Instigator) const;
-	UFUNCTION(BlueprintCallable, Category="Interaction")
-	bool Interact(AActor* Instigator);
-
-protected:
-	virtual void BeginPlay() override;
-
-public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	UFUNCTION(BlueprintPure, Category="Interaction")
+	AActor* GetCurrentInteractable() const;
+	UFUNCTION(BlueprintPure, Category="Interaction")
+	bool CanInteract() const;
+	UFUNCTION(BlueprintPure, Category="Interaction")
+	FText GetInteractionPrompt() const;
+	UFUNCTION(BlueprintCallable, Category="Interaction")
+	bool Interact();
 
-		
+private:
+	bool IsFacingInteractable() const;
+	
 };
