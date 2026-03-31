@@ -17,28 +17,30 @@ class MHJ26_API AMHJPlayerCharacter : public AMHJCharacter
 {
 	GENERATED_BODY()
 	
-private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess=true))
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Input")
 	float ViewPitchMin;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess=true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Input")
 	float ViewPitchMax;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess=true))
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputMappingContext> GeneralInputMappingContext;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess=true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputMappingContext> CinematicInputMappingContext;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess=true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputAction> LookAction;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess=true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputAction> MoveAction;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess=true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputAction> RunAction;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess=true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputAction> InteractAction;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess=true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputAction> AttackAction;
 	
+private:
 	uint8 bInCinematic:1;
 	
 public:
