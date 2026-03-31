@@ -4,19 +4,53 @@
 #include "Character/MHJPlayerCharacter.h"
 #include "Character/MHJCharacterMovementComponent.h"
 
+#include "Camera/CameraComponent.h"
+#include "Interaction/MHJInteractionComponent.h"
+
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+
+FName AMHJPlayerCharacter::FirstPersonCameraComponentName = FName("FPCameraComp");
+FName AMHJPlayerCharacter::FirstPersonInteractionComponentName = FName("FPInteractionComp");
 
 AMHJPlayerCharacter::AMHJPlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	BaseFieldOfView = 80.0f;
+	RunningFieldOfViewModifier = 100.0f / 80.0f;
+	RunningFieldOfViewInterpolationSpeed = 4.0f;
+	WalkingFieldOfViewInterpolationSpeed = 9.0f;
+	
+	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(FirstPersonCameraComponentName);
+	FirstPersonCamera->FieldOfView = BaseFieldOfView;
+	FirstPersonCamera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
+	FirstPersonInteraction = CreateDefaultSubobject<UMHJInteractionComponent>(FirstPersonInteractionComponentName);
+	FirstPersonInteraction->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::KeepRelativeTransform);
+	
 	if (UMHJCharacterMovementComponent* MovementComponent = GetCharacterMovement<UMHJCharacterMovementComponent>())
 	{
 		MovementComponent->bCanRun = true;
 	}
-	
 	ViewPitchMin = -89.0f;
 	ViewPitchMax = 80.0f;
+}
+
+void AMHJPlayerCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+	if (FirstPersonCamera)
+	{
+		bool bIsRunning = false;
+		if (UMHJCharacterMovementComponent* MovementComponent = GetCharacterMovement<UMHJCharacterMovementComponent>())
+		{
+			float Speed = FVector2D(GetVelocity().X, GetVelocity().Y).SquaredLength();
+			bIsRunning = MovementComponent->IsRunning() && Speed > MovementComponent->MaxWalkSpeed * MovementComponent->MaxWalkSpeed;
+		}
+		float DesiredFieldOfView = bIsRunning ? BaseFieldOfView * RunningFieldOfViewModifier : BaseFieldOfView;
+		float DesiredInterpolationSpeed = bIsRunning ? RunningFieldOfViewInterpolationSpeed : WalkingFieldOfViewInterpolationSpeed;
+		FirstPersonCamera->FieldOfView = FMath::FInterpTo(FirstPersonCamera->FieldOfView, DesiredFieldOfView, DeltaTime, DesiredInterpolationSpeed);
+	}
 }
 
 void AMHJPlayerCharacter::EnterCinematic()

@@ -8,6 +8,8 @@
 
 class UInputMappingContext;
 class UInputAction;
+class UCameraComponent;
+class UMHJInteractionComponent;
 
 /**
  * 
@@ -18,6 +20,19 @@ class MHJ26_API AMHJPlayerCharacter : public AMHJCharacter
 	GENERATED_BODY()
 	
 public:
+	static FName FirstPersonCameraComponentName;
+	static FName FirstPersonInteractionComponentName;
+	
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Camera", meta=(ClampMin=60, UIMin=60))
+	float BaseFieldOfView;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Camera", meta=(ClampMin=0, UIMin=0))
+	float RunningFieldOfViewModifier;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Camera", meta=(ClampMin=0, UIMin=0))
+	float RunningFieldOfViewInterpolationSpeed;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Camera", meta=(ClampMin=0, UIMin=0))
+	float WalkingFieldOfViewInterpolationSpeed;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Input")
 	float ViewPitchMin;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Input")
@@ -41,15 +56,25 @@ protected:
 	TObjectPtr<UInputAction> AttackAction;
 	
 private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Camera", meta=(AllowPrivateAccess=true))
+	TObjectPtr<UCameraComponent> FirstPersonCamera;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Interaction", meta=(AllowPrivateAccess=true))
+	TObjectPtr<UMHJInteractionComponent> FirstPersonInteraction;
+	
 	uint8 bInCinematic:1;
 	
 public:
 	AMHJPlayerCharacter(const FObjectInitializer& ObjectInitializer);
 	
+	virtual void Tick(float DeltaTime);
+	
 	UFUNCTION(BlueprintCallable, Category="Input")
 	void EnterCinematic();
 	UFUNCTION(BlueprintCallable, Category="Input")
 	void EnterGameplay();
+	
+	FORCEINLINE UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCamera; }
+	FORCEINLINE UMHJInteractionComponent* GetFirstPersonInteraction() const { return FirstPersonInteraction; }
 	
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
