@@ -28,9 +28,9 @@ public:
 	bool GetItem(int32 Index, UMHJItem*& OutItem) const;
 	
 	UFUNCTION(BlueprintPure, Category="Inventory")
-	FORCEINLINE bool Contains(UMHJItem* Item) const { return ExistingItems.Contains(Item); }
+	bool Contains(UMHJItem* Item) const;
 	UFUNCTION(BlueprintPure, Category="Inventory")
-	FORCEINLINE int32 IndexOf(UMHJItem* Item) const { return ExistingItems.Contains(Item) ? ExistingItems[Item] : -1; }
+	int32 IndexOf(UMHJItem* Item) const;
 	
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	bool Add(UMHJItem* Item);

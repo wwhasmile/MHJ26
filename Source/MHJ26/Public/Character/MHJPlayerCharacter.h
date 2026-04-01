@@ -10,6 +10,7 @@ class UInputMappingContext;
 class UInputAction;
 class UCameraComponent;
 class UMHJInteractionComponent;
+class UMHJInventoryComponent;
 
 /**
  * 
@@ -22,6 +23,7 @@ class MHJ26_API AMHJPlayerCharacter : public AMHJCharacter
 public:
 	static FName FirstPersonCameraComponentName;
 	static FName FirstPersonInteractionComponentName;
+	static FName InventoryComponentName;
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Camera", meta=(ClampMin=60, UIMin=60))
@@ -60,6 +62,8 @@ private:
 	TObjectPtr<UCameraComponent> FirstPersonCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Interaction", meta=(AllowPrivateAccess=true))
 	TObjectPtr<UMHJInteractionComponent> FirstPersonInteraction;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Inventory", meta=(AllowPrivateAccess=true))
+	TObjectPtr<UMHJInventoryComponent> Inventory;
 	
 	uint8 bInCinematic:1;
 	
@@ -75,6 +79,7 @@ public:
 	
 	FORCEINLINE UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCamera; }
 	FORCEINLINE UMHJInteractionComponent* GetFirstPersonInteraction() const { return FirstPersonInteraction; }
+	FORCEINLINE UMHJInventoryComponent* GetInventory() const { return Inventory; }
 	
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;

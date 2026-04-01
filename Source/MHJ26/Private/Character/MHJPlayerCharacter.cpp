@@ -6,12 +6,14 @@
 
 #include "Camera/CameraComponent.h"
 #include "Interaction/MHJInteractionComponent.h"
+#include "Inventory/MHJInventoryComponent.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 
 FName AMHJPlayerCharacter::FirstPersonCameraComponentName = FName("FPCameraComp");
 FName AMHJPlayerCharacter::FirstPersonInteractionComponentName = FName("FPInteractionComp");
+FName AMHJPlayerCharacter::InventoryComponentName = FName("InventoryComp");
 
 AMHJPlayerCharacter::AMHJPlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -26,6 +28,8 @@ AMHJPlayerCharacter::AMHJPlayerCharacter(const FObjectInitializer& ObjectInitial
 	FirstPersonCamera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
 	FirstPersonInteraction = CreateDefaultSubobject<UMHJInteractionComponent>(FirstPersonInteractionComponentName);
 	FirstPersonInteraction->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::KeepRelativeTransform);
+	
+	Inventory = CreateDefaultSubobject<UMHJInventoryComponent>(InventoryComponentName);
 	
 	if (UMHJCharacterMovementComponent* MovementComponent = GetCharacterMovement<UMHJCharacterMovementComponent>())
 	{

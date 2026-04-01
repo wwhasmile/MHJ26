@@ -21,6 +21,28 @@ bool UMHJInventoryComponent::GetItem(int32 Index, UMHJItem*& OutItem) const
 	return false;
 }
 
+bool UMHJInventoryComponent::Contains(UMHJItem* Item) const
+{
+	if (!IsValid(Item))
+	{
+		return false;
+	}
+	return ExistingItems.Contains(Item);
+}
+
+int32 UMHJInventoryComponent::IndexOf(UMHJItem* Item) const
+{
+	if (!IsValid(Item))
+	{
+		return -1;
+	}
+	if (!ExistingItems.Contains(Item))
+	{
+		return -1;
+	}
+	return ExistingItems[Item];
+}
+
 bool UMHJInventoryComponent::Add(UMHJItem* Item)
 {
 	if (!IsValid(Item))
