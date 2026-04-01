@@ -5,7 +5,6 @@
 
 UMHJItem::UMHJItem()
 {
-	MaxStackSize = 1;
 }
 
 bool UMHJItem::Combine(const UMHJItem* With, UMHJItem*& OutItem) const
