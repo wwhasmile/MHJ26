@@ -4,8 +4,8 @@
 #include "Inventory/MHJPickup.h"
 #include "Inventory/MHJInventoryComponent.h"
 
-#include "Character/MHJPlayerCharacter.h"
 #include "Components/SphereComponent.h"
+#include "Inventory/MHJItem.h"
 #include "Kismet/GameplayStatics.h"
 
 FName AMHJPickup::CollisionComponentName = FName(TEXT("CollisionComp"));
@@ -18,34 +18,47 @@ AMHJPickup::AMHJPickup()
 	SetRootComponent(ColliderComponent);
 }
 
-bool AMHJPickup::Interact_Implementation(AActor* Inst)
+int32 AMHJPickup::Interact_Implementation(AActor* Inst)
 {
-	AMHJPlayerCharacter* PlayerCharacter = Cast<AMHJPlayerCharacter>(Inst);
-	if (PlayerCharacter == nullptr)
+	if (!IsValid(Inst))
 	{
-		return false;
+		return -2;
 	}
 	
-	UMHJInventoryComponent* InventoryComponent = PlayerCharacter->GetInventory();
+	UMHJInventoryComponent* InventoryComponent = Inst->FindComponentByClass<UMHJInventoryComponent>();
 	if (!IsValid(InventoryComponent))
 	{
-		return false;
+		return -1;
 	}
 	
 	if (!InventoryComponent->Add(Item.Get()))
 	{
-		return false;
+		return 0;
 	}
 	
-	if (IsValid(PickedUpSound))
-	{
-		UGameplayStatics::PlaySound2D(GetWorld(), PickedUpSound);
-	}
-	Destroy();
-	return false;
+	return 1;
 }
 
-FText AMHJPickup::GetPrompt_Implementation(AActor* Inst) const
+void AMHJPickup::FinalizeInteraction_Implementation(AActor* Subject, int32 InteractionResult)
 {
-	return IMHJInteractable::GetPrompt_Implementation(Inst);
+	if (InteractionResult)
+	{
+		if (IsValid(PickedUpSound))
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), PickedUpSound);
+		}
+		OnTaken.Broadcast();
+		Destroy();	
+	}
+}
+
+FText AMHJPickup::GetMessage_Implementation(AActor* Subject, int32 InteractionResult) const
+{
+	if (InteractionResult < 0)
+	{
+		return FText::GetEmpty();
+	}
+	FFormatNamedArguments Arguments;
+	Arguments.Add("ItemName", Item->GetDisplayName());
+	return FText::Format(InteractionResult ? PickedUpPrompt : ItemExistsPrompt, Arguments);
 }

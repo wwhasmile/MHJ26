@@ -39,6 +39,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Item")
 	bool Combine(const UMHJItem* With, UMHJItem*& OutItem) const;
 	
+	
+	
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
 	
 };

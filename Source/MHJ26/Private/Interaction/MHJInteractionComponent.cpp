@@ -24,12 +24,17 @@ void UMHJInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	QueryParams.AddIgnoredActor(GetOwner());
 	bool bHit = GetWorld()->SweepSingleByChannel(OutHit, Start, End, FQuat::Identity, ECC_Visibility, Shape, QueryParams);
 	AActor* HitActor = OutHit.GetActor();
-	if (bHit && IsValid(HitActor) && HitActor->Implements<UMHJInteractable>())
+	if (bHit && IsValid(HitActor) && HitActor->Implements<UMHJInteractable>() && IMHJInteractable::Execute_CanInteract(HitActor, GetOwner()))
 	{
-		CurrentInteractable = TScriptInterface<IMHJInteractable>(OutHit.GetActor());
+		if (CurrentInteractable != HitActor)
+		{
+			OnHover.Broadcast();
+			CurrentInteractable = TScriptInterface<IMHJInteractable>(OutHit.GetActor());
+		}
 	}
-	else
+	else if (IsValid(CurrentInteractable.GetObject()))
 	{
+		OnUnhover.Broadcast();
 		CurrentInteractable = nullptr;
 	}
 	
@@ -44,22 +49,24 @@ AActor* UMHJInteractionComponent::GetCurrentInteractable() const
 	return IsFacingInteractable() ? Cast<AActor>(CurrentInteractable.GetObject()) : nullptr;
 }
 
-bool UMHJInteractionComponent::CanInteract() const
+FText UMHJInteractionComponent::GetMessage(int32 InteractionResult) const
 {
-	return IsFacingInteractable() && IMHJInteractable::Execute_CanInteract(CurrentInteractable.GetObject(), GetOwner());
-}
-
-FText UMHJInteractionComponent::GetInteractionPrompt() const
-{
-	return CanInteract() ? IMHJInteractable::Execute_GetPrompt(CurrentInteractable.GetObject(), GetOwner()) : FText::GetEmpty();
+	return IsFacingInteractable() ? IMHJInteractable::Execute_GetMessage(CurrentInteractable.GetObject(), GetOwner(), InteractionResult) : FText::GetEmpty();
 }
 
 bool UMHJInteractionComponent::Interact()
 {
-	return CanInteract() && IMHJInteractable::Execute_Interact(CurrentInteractable.GetObject(), GetOwner());
+	if (!IsFacingInteractable())
+	{
+		return false;
+	}
+	const int32 Result = IMHJInteractable::Execute_Interact(CurrentInteractable.GetObject(), GetOwner());
+	OnInteracted.Broadcast(CurrentInteractable, Result);
+	IMHJInteractable::Execute_FinalizeInteraction(CurrentInteractable.GetObject(), GetOwner(), Result);
+	return true;
 }
 
 bool UMHJInteractionComponent::IsFacingInteractable() const
 {
-	return CurrentInteractable.GetObject() != nullptr;
+	return IsValid(CurrentInteractable.GetObject());
 }

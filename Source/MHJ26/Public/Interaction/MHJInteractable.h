@@ -21,13 +21,15 @@ class MHJ26_API IMHJInteractable
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interaction")
-	bool CanInteract(AActor* Instigator) const;
+	bool CanInteract(AActor* Subject) const;
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interaction")
-	bool Interact(AActor* Instigator);
+	int32 Interact(AActor* Subject);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interaction")
+	void FinalizeInteraction(AActor* Subject, int32 InteractionResult);
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interaction")
-	FText GetPrompt(AActor* Instigator) const;
+	FText GetMessage(AActor* Subject, int32 InteractionResult) const;
 	
-	virtual bool CanInteract_Implementation(AActor* Instigator) const;
-	virtual FText GetPrompt_Implementation(AActor* Instigator) const;
+	virtual bool CanInteract_Implementation(AActor* Subject) const;
+	virtual FText GetMessage_Implementation(AActor* Subject, int32 InteractionResult) const;
 };

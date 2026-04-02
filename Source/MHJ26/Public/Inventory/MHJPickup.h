@@ -43,7 +43,8 @@ private:
 public:
 	AMHJPickup();
 	
-	virtual bool Interact_Implementation(AActor* Inst) override;
-	virtual FText GetPrompt_Implementation(AActor* Inst) const override;
+	virtual int32 Interact_Implementation(AActor* Subject) override;
+	virtual void FinalizeInteraction_Implementation(AActor* Subject, int32 InteractionResult) override;
+	virtual FText GetMessage_Implementation(AActor* Subject, int32 InteractionResult) const override;
 	
 };
