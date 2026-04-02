@@ -12,9 +12,9 @@ UMHJInventoryComponent::UMHJInventoryComponent()
 
 bool UMHJInventoryComponent::GetItem(int32 Index, UMHJItem*& OutItem) const
 {
-	if (Slots.IsValidIndex(Index) && Slots[Index].IsValid())
+	if (Slots.IsValidIndex(Index) && IsValid(Slots[Index]))
 	{
-		OutItem = Slots[Index].Get();
+		OutItem = Slots[Index];
 		return true;
 	}
 	OutItem = nullptr;
@@ -112,22 +112,4 @@ bool UMHJInventoryComponent::Combine(UMHJItem* ItemA, UMHJItem* ItemB, UMHJItem*
 	
 	Remove(ItemA);
 	return true;
-}
-
-void UMHJInventoryComponent::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	ExistingItems.Reserve(Slots.Num());
-	TArray<TSoftObjectPtr<UMHJItem>> CleanedSlots;
-	CleanedSlots.Reserve(Slots.Num());
-	for (int32 i = 0; i < Slots.Num(); ++i)
-	{
-		if (!ExistingItems.Contains(Slots[i]))
-		{
-			const int index = CleanedSlots.Add(Slots[i]);
-			ExistingItems.Add(Slots[i], index);
-		}
-	}
-	Slots = CleanedSlots;
 }

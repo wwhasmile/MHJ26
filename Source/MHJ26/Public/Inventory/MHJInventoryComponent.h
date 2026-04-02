@@ -14,9 +14,9 @@ class MHJ26_API UMHJInventoryComponent : public UActorComponent
 	GENERATED_BODY()
 	
 private:
-	TMap<TSoftObjectPtr<UMHJItem>, int32> ExistingItems;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess=true))
-	TArray<TSoftObjectPtr<UMHJItem>> Slots;
+	TMap<TObjectPtr<UMHJItem>, int32> ExistingItems;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess=true))
+	TArray<TObjectPtr<UMHJItem>> Slots;
 	
 public:
 	UMHJInventoryComponent();
@@ -38,8 +38,5 @@ public:
 	void Remove(UMHJItem* Item);
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	bool Combine(UMHJItem* ItemA, UMHJItem* ItemB, UMHJItem*& OutItem);
-
-protected:
-	virtual void BeginPlay() override;
 	
 };

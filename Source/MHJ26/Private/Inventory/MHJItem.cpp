@@ -19,3 +19,8 @@ bool UMHJItem::Combine(const UMHJItem* With, UMHJItem*& OutItem) const
 	OutItem = Combinations[With].Get();
 	return true;
 }
+
+FPrimaryAssetId UMHJItem::GetPrimaryAssetId() const
+{
+	return FPrimaryAssetId("Item", GetFName());
+}
