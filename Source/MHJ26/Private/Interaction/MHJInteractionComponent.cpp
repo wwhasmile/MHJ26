@@ -26,14 +26,16 @@ void UMHJInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	AActor* HitActor = OutHit.GetActor();
 	if (bHit && IsValid(HitActor) && HitActor->Implements<UMHJInteractable>() && IMHJInteractable::Execute_CanInteract(HitActor, GetOwner()))
 	{
+		bFacingInteractable = true;
 		if (CurrentInteractable != HitActor)
 		{
 			OnHover.Broadcast();
 			CurrentInteractable = TScriptInterface<IMHJInteractable>(OutHit.GetActor());
 		}
 	}
-	else if (IsValid(CurrentInteractable.GetObject()))
+	else if (bFacingInteractable)
 	{
+		bFacingInteractable = false;
 		OnUnhover.Broadcast();
 		CurrentInteractable = nullptr;
 	}
@@ -46,17 +48,17 @@ void UMHJInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 AActor* UMHJInteractionComponent::GetCurrentInteractable() const
 {
-	return IsFacingInteractable() ? Cast<AActor>(CurrentInteractable.GetObject()) : nullptr;
+	return bFacingInteractable ? Cast<AActor>(CurrentInteractable.GetObject()) : nullptr;
 }
 
 FText UMHJInteractionComponent::GetMessage(int32 InteractionResult) const
 {
-	return IsFacingInteractable() ? IMHJInteractable::Execute_GetMessage(CurrentInteractable.GetObject(), GetOwner(), InteractionResult) : FText::GetEmpty();
+	return bFacingInteractable ? IMHJInteractable::Execute_GetMessage(CurrentInteractable.GetObject(), GetOwner(), InteractionResult) : FText::GetEmpty();
 }
 
 bool UMHJInteractionComponent::Interact()
 {
-	if (!IsFacingInteractable())
+	if (!bFacingInteractable)
 	{
 		return false;
 	}
@@ -64,9 +66,4 @@ bool UMHJInteractionComponent::Interact()
 	OnInteracted.Broadcast(CurrentInteractable, Result);
 	IMHJInteractable::Execute_FinalizeInteraction(CurrentInteractable.GetObject(), GetOwner(), Result);
 	return true;
-}
-
-bool UMHJInteractionComponent::IsFacingInteractable() const
-{
-	return IsValid(CurrentInteractable.GetObject());
 }

@@ -32,4 +32,5 @@ public:
 	
 	virtual bool CanInteract_Implementation(AActor* Subject) const;
 	virtual FText GetMessage_Implementation(AActor* Subject, int32 InteractionResult) const;
+	
 };

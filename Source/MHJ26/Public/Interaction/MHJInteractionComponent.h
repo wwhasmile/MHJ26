@@ -33,6 +33,7 @@ public:
 	
 private:
 	TScriptInterface<IMHJInteractable> CurrentInteractable;
+	bool bFacingInteractable;
 	
 public:
 	UMHJInteractionComponent();
@@ -45,8 +46,5 @@ public:
 	FText GetMessage(int32 InteractionResult) const;
 	UFUNCTION(BlueprintCallable, Category="Interaction")
 	bool Interact();
-
-private:
-	bool IsFacingInteractable() const;
 	
 };
