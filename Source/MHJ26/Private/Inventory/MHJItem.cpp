@@ -3,10 +3,6 @@
 
 #include "Inventory/MHJItem.h"
 
-UMHJItem::UMHJItem()
-{
-}
-
 bool UMHJItem::Combine(const UMHJItem* With, UMHJItem*& OutItem) const
 {
 	OutItem = nullptr;
@@ -16,7 +12,7 @@ bool UMHJItem::Combine(const UMHJItem* With, UMHJItem*& OutItem) const
 		return false;
 	}
 	
-	OutItem = Combinations[With].Get();
+	OutItem = Combinations[With].LoadSynchronous();
 	return true;
 }
 

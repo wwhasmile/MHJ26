@@ -27,8 +27,6 @@ protected:
 	TMap<TSoftObjectPtr<UMHJItem>, TSoftObjectPtr<UMHJItem>> Combinations;
 	
 public:
-	UMHJItem();
-	
 	FORCEINLINE UTexture2D* GetIcon() const { return Icon.Get(); }
 	FORCEINLINE FText GetDisplayName() const { return DisplayName; }
 	FORCEINLINE FText GetDescription() const { return Description; }
@@ -38,8 +36,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Item")
 	bool Combine(const UMHJItem* With, UMHJItem*& OutItem) const;
-	
-	
 	
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
 	
