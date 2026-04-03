@@ -37,6 +37,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	void Remove(UMHJItem* Item);
 	UFUNCTION(BlueprintCallable, Category="Inventory")
-	bool Combine(UMHJItem* ItemA, UMHJItem* ItemB, UMHJItem*& OutItem);
+	bool Combine(UMHJItem* ItemA, UMHJItem* ItemB, UMHJItem*& OutItem, int32& OutIndex);
 	
 };
