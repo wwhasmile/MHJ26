@@ -106,13 +106,12 @@ bool UMHJInventoryComponent::Combine(UMHJItem* ItemA, UMHJItem* ItemB, UMHJItem*
 		return false;
 	}
 	
-	const int32 Index = ExistingItems[ItemB];
-	Slots[Index] = OutItem;
-	ExistingItems.Remove(ItemB);
-	ExistingItems.Add(OutItem, Index);
-	
 	Remove(ItemA);
-	OutIndex = ExistingItems[OutItem];
+	
+	OutIndex = ExistingItems[ItemB];
+	Slots[OutIndex] = OutItem;
+	ExistingItems.Remove(ItemB);
+	ExistingItems.Add(OutItem, OutIndex);
 	
 	return true;
 }
