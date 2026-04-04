@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
 #include "MHJItem.generated.h"
 
 class UTexture2D;
