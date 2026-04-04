@@ -31,7 +31,7 @@ void AMHJPlayerHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	
 	if (IsValid(WidgetInstance))
 	{
-		WidgetInstance->RemoveFromViewport();
+		WidgetInstance->RemoveFromParent();
 		WidgetInstance = nullptr;
 	}
 }
