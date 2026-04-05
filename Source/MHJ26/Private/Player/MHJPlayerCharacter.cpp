@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Hasmile
 
 
-#include "Character/MHJPlayerCharacter.h"
+#include "Player/MHJPlayerCharacter.h"
 #include "Character/MHJCharacterMovementComponent.h"
 
 #include "Camera/CameraComponent.h"
@@ -11,9 +11,11 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 
-FName AMHJPlayerCharacter::FirstPersonCameraComponentName = FName("FPCameraComp");
-FName AMHJPlayerCharacter::FirstPersonInteractionComponentName = FName("FPInteractionComp");
-FName AMHJPlayerCharacter::InventoryComponentName = FName("InventoryComp");
+const FString AMHJPlayerCharacter::PlayerCharacterName(TEXT("PlayerCharacter"));
+
+const FName AMHJPlayerCharacter::FirstPersonCameraComponentName("FPCameraComp");
+const FName AMHJPlayerCharacter::FirstPersonInteractionComponentName("FPInteractionComp");
+const FName AMHJPlayerCharacter::InventoryComponentName("InventoryComp");
 
 AMHJPlayerCharacter::AMHJPlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -84,6 +86,36 @@ void AMHJPlayerCharacter::EnterGameplay()
 		Subsystem->ClearAllMappings();
 		Subsystem->AddMappingContext(GeneralInputMappingContext, 0);
 	}
+}
+
+FString AMHJPlayerCharacter::OverrideName_Implementation() const
+{
+	return PlayerCharacterName;
+}
+
+void AMHJPlayerCharacter::SpudStoreCustomData_Implementation(const USpudState* State, USpudStateCustomData* CustomData)
+{
+	TArray<FPrimaryAssetId> Slots = Inventory->GetSlotsSerialized();
+	CustomData->WriteInt(Slots.Num());
+	for (const FPrimaryAssetId& SlotId : Slots)
+	{
+		CustomData->WriteString(SlotId.PrimaryAssetName.ToString());
+	}
+}
+
+void AMHJPlayerCharacter::SpudRestoreCustomData_Implementation(USpudState* State, USpudStateCustomData* CustomData)
+{
+	TArray<FPrimaryAssetId> Slots;
+	int32 Num;
+	CustomData->ReadInt(Num);
+	Slots.Reserve(Num);
+	for (int32 i = 0; i < Num; ++i)
+	{
+		FString NameString;
+		CustomData->ReadString(NameString);
+		Slots.Add(FPrimaryAssetId("Item", FName(NameString)));
+	}
+	Inventory->LoadSlotsSerialized(Slots);
 }
 
 void AMHJPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

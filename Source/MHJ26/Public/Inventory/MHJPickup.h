@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "ISpudObject.h"
 #include "GameFramework/Actor.h"
 #include "Interaction/MHJInteractable.h"
 #include "MHJPickup.generated.h"
@@ -13,12 +14,12 @@ class USphereComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMHJPickupTaken);
 
 UCLASS()
-class MHJ26_API AMHJPickup : public AActor, public IMHJInteractable
+class MHJ26_API AMHJPickup : public AActor, public IMHJInteractable, public ISpudObject
 {
 	GENERATED_BODY()
 
 public:
-	static FName CollisionComponentName;
+	static const FName CollisionComponentName;
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item")

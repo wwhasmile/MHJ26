@@ -2,6 +2,8 @@
 
 
 #include "Inventory/MHJInventoryComponent.h"
+
+#include "Engine/AssetManager.h"
 #include "Inventory/MHJItem.h"
 
 
@@ -114,4 +116,38 @@ bool UMHJInventoryComponent::Combine(UMHJItem* ItemA, UMHJItem* ItemB, UMHJItem*
 	ExistingItems.Add(OutItem, OutIndex);
 	
 	return true;
+}
+
+TArray<FPrimaryAssetId> UMHJInventoryComponent::GetSlotsSerialized() const
+{
+	TArray<FPrimaryAssetId> Result;
+	Result.Reserve(Slots.Num());
+	
+	for (const UMHJItem* Item : Slots)
+	{
+		Result.Add(Item->GetPrimaryAssetId());
+	}
+	return Result;
+}
+
+void UMHJInventoryComponent::LoadSlotsSerialized(const TArray<FPrimaryAssetId>& Items)
+{
+	Slots.Empty(Items.Num());
+	ExistingItems.Empty();
+	
+	UAssetManager& AssetManager = UAssetManager::Get();
+	TSharedPtr<FStreamableHandle> Handle = AssetManager.LoadPrimaryAssets(Items);
+	if (Handle.IsValid())
+	{
+		Handle->WaitUntilComplete();
+	}
+	
+	for (const FPrimaryAssetId& ItemId : Items)
+	{
+		if (UMHJItem* Item = AssetManager.GetPrimaryAssetObject<UMHJItem>(ItemId))
+		{
+			Slots.Add(Item);
+			ExistingItems.Add(Item);
+		}
+	}
 }

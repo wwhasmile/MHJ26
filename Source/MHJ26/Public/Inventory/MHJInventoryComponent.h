@@ -37,4 +37,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	bool Combine(UMHJItem* ItemA, UMHJItem* ItemB, UMHJItem*& OutItem, int32& OutIndex);
 	
+	UFUNCTION(BlueprintPure, Category="Serialization")
+	TArray<FPrimaryAssetId> GetSlotsSerialized() const;
+	UFUNCTION(BlueprintCallable, Category="Serialization")
+	void LoadSlotsSerialized(const TArray<FPrimaryAssetId>& Items);
+	
 };

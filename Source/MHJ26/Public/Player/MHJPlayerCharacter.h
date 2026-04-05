@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "ISpudObject.h"
 #include "Character/MHJCharacter.h"
 #include "MHJPlayerCharacter.generated.h"
 
@@ -15,14 +16,16 @@ class UMHJInventoryComponent;
  * 
  */
 UCLASS()
-class MHJ26_API AMHJPlayerCharacter : public AMHJCharacter
+class MHJ26_API AMHJPlayerCharacter : public AMHJCharacter, public ISpudObject, public ISpudObjectCallback
 {
 	GENERATED_BODY()
 	
 public:
-	static FName FirstPersonCameraComponentName;
-	static FName FirstPersonInteractionComponentName;
-	static FName InventoryComponentName;
+	static const FString PlayerCharacterName;
+	
+	static const FName FirstPersonCameraComponentName;
+	static const FName FirstPersonInteractionComponentName;
+	static const FName InventoryComponentName;
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Camera", meta=(ClampMin=60, UIMin=60))
@@ -79,6 +82,11 @@ public:
 	FORCEINLINE UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCamera; }
 	FORCEINLINE UMHJInteractionComponent* GetFirstPersonInteraction() const { return FirstPersonInteraction; }
 	FORCEINLINE UMHJInventoryComponent* GetInventory() const { return Inventory; }
+	
+	virtual FString OverrideName_Implementation() const override;
+	
+	virtual void SpudStoreCustomData_Implementation(const USpudState* State, USpudStateCustomData* CustomData) override;
+	virtual void SpudRestoreCustomData_Implementation(USpudState* State, USpudStateCustomData* CustomData) override;
 	
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;

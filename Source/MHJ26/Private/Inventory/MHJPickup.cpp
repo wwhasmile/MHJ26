@@ -8,7 +8,7 @@
 #include "Inventory/MHJItem.h"
 #include "Kismet/GameplayStatics.h"
 
-FName AMHJPickup::CollisionComponentName = FName(TEXT("CollisionComp"));
+const FName AMHJPickup::CollisionComponentName("CollisionComp");
 
 AMHJPickup::AMHJPickup()
 {
