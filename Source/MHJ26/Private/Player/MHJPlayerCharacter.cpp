@@ -11,11 +11,13 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 
-const FString AMHJPlayerCharacter::PlayerCharacterName(TEXT("PlayerCharacter"));
+const FString AMHJPlayerCharacter::PlayerCharacterName("PlayerCharacter");
 
 const FName AMHJPlayerCharacter::FirstPersonCameraComponentName("FPCameraComp");
 const FName AMHJPlayerCharacter::FirstPersonInteractionComponentName("FPInteractionComp");
 const FName AMHJPlayerCharacter::InventoryComponentName("InventoryComp");
+
+const FName AMHJPlayerCharacter::FirstPersonCameraSocketName("CameraSocket");
 
 AMHJPlayerCharacter::AMHJPlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -27,7 +29,7 @@ AMHJPlayerCharacter::AMHJPlayerCharacter(const FObjectInitializer& ObjectInitial
 	
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(FirstPersonCameraComponentName);
 	FirstPersonCamera->FieldOfView = BaseFieldOfView;
-	FirstPersonCamera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
+	FirstPersonCamera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FirstPersonCameraSocketName);
 	FirstPersonInteraction = CreateDefaultSubobject<UMHJInteractionComponent>(FirstPersonInteractionComponentName);
 	FirstPersonInteraction->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::KeepRelativeTransform);
 	
@@ -36,6 +38,7 @@ AMHJPlayerCharacter::AMHJPlayerCharacter(const FObjectInitializer& ObjectInitial
 	if (UMHJCharacterMovementComponent* MovementComponent = GetCharacterMovement<UMHJCharacterMovementComponent>())
 	{
 		MovementComponent->bCanRun = true;
+		MovementComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
 	}
 	ViewPitchMin = -89.0f;
 	ViewPitchMax = 80.0f;
@@ -67,6 +70,12 @@ void AMHJPlayerCharacter::EnterCinematic()
 		
 		Subsystem->ClearAllMappings();
 		Subsystem->AddMappingContext(CinematicInputMappingContext, 0);
+		
+		if (UMHJCharacterMovementComponent* MovementComponent = GetCharacterMovement<UMHJCharacterMovementComponent>())
+		{
+			MovementComponent->StopRunning();
+		}
+		UnCrouch();
 	}
 }
 
@@ -128,6 +137,8 @@ void AMHJPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	{
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMHJPlayerCharacter::Look);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMHJPlayerCharacter::Move);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AMHJPlayerCharacter::StartCrouching);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AMHJPlayerCharacter::StopCrouching);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Started, this, &AMHJPlayerCharacter::StartRunning);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &AMHJPlayerCharacter::StopRunning);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AMHJPlayerCharacter::Interact);
@@ -158,6 +169,16 @@ void AMHJPlayerCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
+void AMHJPlayerCharacter::StartCrouching(const FInputActionValue& Value)
+{
+	Crouch();
+}
+
+void AMHJPlayerCharacter::StopCrouching(const FInputActionValue& Value)
+{
+	UnCrouch();
+}
+
 void AMHJPlayerCharacter::StartRunning(const FInputActionValue& Value)
 {
 	if (UMHJCharacterMovementComponent* MovementComponent = GetCharacterMovement<UMHJCharacterMovementComponent>())
@@ -181,3 +202,5 @@ void AMHJPlayerCharacter::Interact(const FInputActionValue& Value)
 		FirstPersonInteraction->Interact();
 	}
 }
+
+

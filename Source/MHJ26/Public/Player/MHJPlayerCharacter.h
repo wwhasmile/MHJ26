@@ -27,6 +27,8 @@ public:
 	static const FName FirstPersonInteractionComponentName;
 	static const FName InventoryComponentName;
 	
+	static const FName FirstPersonCameraSocketName;
+	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Camera", meta=(ClampMin=60, UIMin=60))
 	float BaseFieldOfView;
@@ -52,6 +54,8 @@ protected:
 	TObjectPtr<UInputAction> LookAction;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputAction> MoveAction;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
+	TObjectPtr<UInputAction> CrouchAction;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputAction> RunAction;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
@@ -96,6 +100,11 @@ private:
 	void Look(const FInputActionValue& Value);
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
+	
+	UFUNCTION()
+	void StartCrouching(const FInputActionValue& Value);
+	UFUNCTION()
+	void StopCrouching(const FInputActionValue& Value);
 	
 	UFUNCTION()
 	void StartRunning(const FInputActionValue& Value);
