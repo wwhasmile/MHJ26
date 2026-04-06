@@ -11,6 +11,11 @@ class UInputAction;
 class UCameraComponent;
 class UMHJInteractionComponent;
 class UMHJInventoryComponent;
+class UDamageType;
+class USoundBase;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMHJPlayerCharacterDeath, TSubclassOf<UDamageType>, DamageType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMHJPlayerCharacterDecay);
 
 /**
  * 
@@ -44,7 +49,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Input")
 	float ViewPitchMax;
 	
+	UPROPERTY(BlueprintAssignable, Category="Death")
+	FMHJPlayerCharacterDeath OnDeath;
+	UPROPERTY(BlueprintAssignable, Category="Death")
+	FMHJPlayerCharacterDecay OnDecay;
+	
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Death", meta = (UIMin=0, ClampMin=0, ForceUnits="s"))
+	float PreDecayDelay;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Death")
+	TObjectPtr<USoundBase> DeathSound;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputMappingContext> GeneralInputMappingContext;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
@@ -60,8 +75,6 @@ protected:
 	TObjectPtr<UInputAction> RunAction;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputAction> InteractAction;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
-	TObjectPtr<UInputAction> AttackAction;
 	
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Camera", meta=(AllowPrivateAccess=true))
@@ -72,11 +85,17 @@ private:
 	TObjectPtr<UMHJInventoryComponent> Inventory;
 	
 	uint8 bInCinematic:1;
+	uint8 bDead:1;
+	
+	FTimerHandle DecayTimerHandle;
 	
 public:
 	AMHJPlayerCharacter(const FObjectInitializer& ObjectInitializer);
 	
 	virtual void Tick(float DeltaTime);
+	
+	UFUNCTION(BlueprintPure, Category="Death")
+	FORCEINLINE bool IsDead() const { return bDead; }
 	
 	UFUNCTION(BlueprintCallable, Category="Input")
 	void EnterCinematic();
@@ -94,6 +113,12 @@ public:
 	
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	
+	UFUNCTION(BlueprintNativeEvent, Category="Death")
+	void Decay();
+	virtual void Decay_Implementation() { }
 	
 private:
 	UFUNCTION()
@@ -113,5 +138,8 @@ private:
 	
 	UFUNCTION()
 	void Interact(const FInputActionValue& Value);
+	
+	UFUNCTION()
+	void Died();
 	
 };

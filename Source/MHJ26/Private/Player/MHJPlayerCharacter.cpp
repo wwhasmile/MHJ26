@@ -10,6 +10,8 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Engine/DamageEvents.h"
+#include "Kismet/GameplayStatics.h"
 
 const FString AMHJPlayerCharacter::PlayerCharacterName("PlayerCharacter");
 
@@ -22,6 +24,8 @@ const FName AMHJPlayerCharacter::FirstPersonCameraSocketName("CameraSocket");
 AMHJPlayerCharacter::AMHJPlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	PreDecayDelay = 8.0f;
+	
 	BaseFieldOfView = 80.0f;
 	RunningFieldOfViewModifier = 100.0f / 80.0f;
 	RunningFieldOfViewInterpolationSpeed = 4.0f;
@@ -56,7 +60,7 @@ void AMHJPlayerCharacter::Tick(float DeltaTime)
 		if (UMHJCharacterMovementComponent* MovementComponent = GetCharacterMovement<UMHJCharacterMovementComponent>())
 		{
 			float Speed = FVector2D(GetVelocity().X, GetVelocity().Y).SquaredLength();
-			bIsRunning = MovementComponent->IsRunning() && Speed > MovementComponent->MaxWalkSpeed * MovementComponent->MaxWalkSpeed;
+			bIsRunning = !bDead && MovementComponent->IsRunning() && Speed > MovementComponent->MaxWalkSpeed * MovementComponent->MaxWalkSpeed;
 		}
 		float DesiredFieldOfView = bIsRunning ? BaseFieldOfView * RunningFieldOfViewModifier : BaseFieldOfView;
 		float DesiredInterpolationSpeed = bIsRunning ? RunningFieldOfViewInterpolationSpeed : WalkingFieldOfViewInterpolationSpeed;
@@ -66,6 +70,11 @@ void AMHJPlayerCharacter::Tick(float DeltaTime)
 
 void AMHJPlayerCharacter::EnterCinematic()
 {
+	if (bDead)
+	{
+		return;
+	}
+	
 	if (APlayerController* PlayerController = CastChecked<APlayerController>(GetController()))
 	{
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
@@ -83,6 +92,11 @@ void AMHJPlayerCharacter::EnterCinematic()
 
 void AMHJPlayerCharacter::EnterGameplay()
 {
+	if (bDead)
+	{
+		return;
+	}
+	
 	if (APlayerController* PlayerController = CastChecked<APlayerController>(GetController()))
 	{
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
@@ -147,6 +161,27 @@ void AMHJPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 }
 
+float AMHJPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	if (!bDead)
+	{
+		bDead = true;
+		OnDeath.Broadcast(DamageEvent.DamageTypeClass);
+		GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &AMHJPlayerCharacter::Died, PreDecayDelay, false);
+		UGameplayStatics::PlaySound2D(GetWorld(), DeathSound, 1.0f, 1.0f, 0.0f);
+		
+		if (APlayerController* PlayerController = CastChecked<APlayerController>(GetController()))
+		{
+			UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+			Subsystem->ClearAllMappings();
+		}
+	}
+	return Damage;
+}
+
 void AMHJPlayerCharacter::Look(const FInputActionValue& Value)
 {
 	const FVector2D Axis = Value.Get<FVector2D>();
@@ -203,6 +238,13 @@ void AMHJPlayerCharacter::Interact(const FInputActionValue& Value)
 	{
 		FirstPersonInteraction->Interact();
 	}
+}
+
+void AMHJPlayerCharacter::Died()
+{
+	OnDecay.Broadcast();
+	Decay();
+	Destroy();
 }
 
 

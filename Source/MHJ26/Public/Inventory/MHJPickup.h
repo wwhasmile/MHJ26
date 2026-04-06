@@ -33,7 +33,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item")
 	TObjectPtr<USoundBase> PickedUpSound;
 	
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category="Item")
+	UPROPERTY(BlueprintAssignable, Category="Item")
 	FMHJPickupTaken OnTaken;
 	
 private:
