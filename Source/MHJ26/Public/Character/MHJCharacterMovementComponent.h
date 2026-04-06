@@ -19,7 +19,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Movement: Walking", meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
 	float MaxRunSpeed;
 	
-	UPROPERTY(BlueprintReadOnly, Category="Character Movement: Walking", meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
+private:
 	uint8 bRunning:1;
 	
 public:
@@ -30,6 +30,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Character Movement: Walking")
 	void StopRunning();
 	
+	UFUNCTION(BlueprintPure, Category="Character Movement: Walking")
 	FORCEINLINE bool IsRunning() const { return bCanRun && bRunning; }
 	
 	virtual float GetMaxSpeed() const override;
