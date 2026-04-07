@@ -35,7 +35,7 @@ AMHJPlayerCharacter::AMHJPlayerCharacter(const FObjectInitializer& ObjectInitial
 	FirstPersonCamera->FieldOfView = BaseFieldOfView;
 	FirstPersonCamera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FirstPersonCameraSocketName);
 	FirstPersonInteraction = CreateDefaultSubobject<UMHJInteractionComponent>(FirstPersonInteractionComponentName);
-	FirstPersonInteraction->ArmLength = 120.0f;
+	FirstPersonInteraction->ArmLength = 60.0f;
 	FirstPersonInteraction->ArmRadius = 2.0f;
 	FirstPersonInteraction->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::KeepRelativeTransform);
 	
