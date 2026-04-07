@@ -43,7 +43,10 @@ void UMHJInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	FLinearColor TraceColor = FLinearColor::Yellow;
 	FLinearColor TraceHitColor = FLinearColor::Green;
 	float DrawTime = PrimaryComponentTick.TickInterval;
+	
+#if !UE_BUILD_SHIPPING
 	DrawDebugSphereTraceSingle(GetWorld(), Start, End, ArmRadius, EDrawDebugTrace::ForDuration, bHit, OutHit, TraceColor, TraceHitColor, DrawTime);
+#endif
 }
 
 AActor* UMHJInteractionComponent::GetCurrentInteractable() const

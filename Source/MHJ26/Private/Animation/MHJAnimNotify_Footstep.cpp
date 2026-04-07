@@ -57,7 +57,9 @@ void UMHJAnimNotify_Footstep::Notify(USkeletalMeshComponent* MeshComp, UAnimSequ
 	CollisionQueryParams.AddIgnoredActor(Owner);
 	CollisionQueryParams.bReturnPhysicalMaterial = true;
 	bool bHit = World->LineTraceSingleByChannel(Hit, StartLocation, EndLocation, ECC_Visibility, CollisionQueryParams);
+#if !UE_BUILD_SHIPPING
 	DrawDebugLineTraceSingle(World, StartLocation, EndLocation, EDrawDebugTrace::ForDuration, bHit, Hit, FLinearColor::Red, FLinearColor::Green, 2.0f);
+#endif
 	
 	if (bHit)
 	{

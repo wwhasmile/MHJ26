@@ -148,10 +148,6 @@
 			"Enabled": false
 		},
 		{
-			"Name": "ACLPlugin",
-			"Enabled": false
-		},
-		{
 			"Name": "ChaosCloth",
 			"Enabled": false
 		},
@@ -207,10 +203,6 @@
 		{
 			"Name": "OodleNetwork",
 			"Enabled": false
-		},
-		{
-			"Name": "OpenImageDenoise",
-			"Enabled": true
 		},
 		{
 			"Name": "NNEDenoiser",
@@ -607,15 +599,6 @@
 		{
 			"Name": "ProceduralMeshComponent",
 			"Enabled": false
-		},
-		{
-			"Name": "ProjectLauncher",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"Win64",
-				"Linux",
-				"Mac"
-			]
 		},
 		{
 			"Name": "RenderGraphInsights",
