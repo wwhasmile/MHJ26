@@ -35,8 +35,8 @@ AMHJPlayerCharacter::AMHJPlayerCharacter(const FObjectInitializer& ObjectInitial
 	FirstPersonCamera->FieldOfView = BaseFieldOfView;
 	FirstPersonCamera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, FirstPersonCameraSocketName);
 	FirstPersonInteraction = CreateDefaultSubobject<UMHJInteractionComponent>(FirstPersonInteractionComponentName);
-	FirstPersonInteraction->ArmLength = 92.0f;
-	FirstPersonInteraction->ArmRadius = 6.0f;
+	FirstPersonInteraction->ArmLength = 120.0f;
+	FirstPersonInteraction->ArmRadius = 2.0f;
 	FirstPersonInteraction->AttachToComponent(FirstPersonCamera, FAttachmentTransformRules::KeepRelativeTransform);
 	
 	Inventory = CreateDefaultSubobject<UMHJInventoryComponent>(InventoryComponentName);
@@ -88,6 +88,11 @@ void AMHJPlayerCharacter::EnterCinematic()
 		}
 		UnCrouch();
 	}
+	
+	if (IsValid(FirstPersonInteraction))
+	{
+		FirstPersonInteraction->Deactivate();
+	}
 }
 
 void AMHJPlayerCharacter::EnterGameplay()
@@ -110,6 +115,11 @@ void AMHJPlayerCharacter::EnterGameplay()
 		
 		Subsystem->ClearAllMappings();
 		Subsystem->AddMappingContext(GeneralInputMappingContext, 0);
+	}
+	
+	if (IsValid(FirstPersonInteraction))
+	{
+		FirstPersonInteraction->Activate();
 	}
 }
 
@@ -168,16 +178,21 @@ float AMHJPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	
 	if (!bDead)
 	{
-		bDead = true;
-		OnDeath.Broadcast(DamageEvent.DamageTypeClass);
-		GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &AMHJPlayerCharacter::Died, PreDecayDelay, false);
-		UGameplayStatics::PlaySound2D(GetWorld(), DeathSound, 1.0f, 1.0f, 0.0f);
-		
 		if (APlayerController* PlayerController = CastChecked<APlayerController>(GetController()))
 		{
 			UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 			Subsystem->ClearAllMappings();
 		}
+		
+		bDead = true;
+		if (IsValid(FirstPersonInteraction))
+		{
+			FirstPersonInteraction->Deactivate();
+		}
+		
+		Death(DamageEvent.DamageTypeClass);
+		OnDeath.Broadcast(DamageEvent.DamageTypeClass);
+		GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &AMHJPlayerCharacter::Decay, PreDecayDelay, false);
 	}
 	return Damage;
 }
@@ -240,11 +255,14 @@ void AMHJPlayerCharacter::Interact(const FInputActionValue& Value)
 	}
 }
 
-void AMHJPlayerCharacter::Died()
+void AMHJPlayerCharacter::Decay()
 {
-	OnDecay.Broadcast();
-	Decay();
 	Destroy();
+}
+
+void AMHJPlayerCharacter::Suicide()
+{
+	TakeDamage(1000.0f, FDamageEvent(), GetController(), this);
 }
 
 

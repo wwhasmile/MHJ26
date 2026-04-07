@@ -12,10 +12,8 @@ class UCameraComponent;
 class UMHJInteractionComponent;
 class UMHJInventoryComponent;
 class UDamageType;
-class USoundBase;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMHJPlayerCharacterDeath, TSubclassOf<UDamageType>, DamageType);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMHJPlayerCharacterDecay);
 
 /**
  * 
@@ -51,14 +49,10 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category="Death")
 	FMHJPlayerCharacterDeath OnDeath;
-	UPROPERTY(BlueprintAssignable, Category="Death")
-	FMHJPlayerCharacterDecay OnDecay;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Death", meta = (UIMin=0, ClampMin=0, ForceUnits="s"))
 	float PreDecayDelay;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Death")
-	TObjectPtr<USoundBase> DeathSound;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputMappingContext> GeneralInputMappingContext;
@@ -117,8 +111,8 @@ protected:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
 	UFUNCTION(BlueprintNativeEvent, Category="Death")
-	void Decay();
-	virtual void Decay_Implementation() { }
+	void Death(TSubclassOf<UDamageType> DamageType);
+	virtual void Death_Implementation(TSubclassOf<UDamageType> DamageType) { }
 	
 private:
 	UFUNCTION()
@@ -140,6 +134,9 @@ private:
 	void Interact(const FInputActionValue& Value);
 	
 	UFUNCTION()
-	void Died();
+	void Decay();
+	
+	UFUNCTION(Exec)
+	void Suicide();
 	
 };
