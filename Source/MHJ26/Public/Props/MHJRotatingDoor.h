@@ -8,7 +8,6 @@
 #include "MHJRotatingDoor.generated.h"
 
 class UMHJItem;
-class UBoxComponent;
 class USceneComponent;
 class UStaticMeshComponent;
 class UTimelineComponent;
@@ -16,6 +15,12 @@ class UTimelineComponent;
 #if WITH_EDITORONLY_DATA
 class UArrowComponent;
 #endif
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMHJRotatingDoorUnlockedSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMHJRotatingDoorLockedSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMHJRotatingDoorBarredSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMHJRotatingDoorOpenedSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMHJRotatingDoorClosedSignature);
 
 UENUM(BlueprintType)
 enum class EMHJRotatingDoorState : uint8
@@ -32,7 +37,7 @@ class MHJ26_API AMHJRotatingDoor : public AActor, public IMHJInteractable, publi
 	GENERATED_BODY()
 	
 public:
-	static FName ColliderComponentName;
+	static FName RootPivotComponentName;
 	static FName PivotComponentName;
 	static FName DoorMeshComponentName;
 	static FName DoorTimelineComponentName;
@@ -49,6 +54,9 @@ private:
 	EMHJRotatingDoorState State;
 	
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door", SaveGame)
+	TObjectPtr<AMHJRotatingDoor> PartnerDoor;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Door", SaveGame, meta=(EditCondition="State == EMHJRotatingDoorState::RDS_Locked"))
 	TObjectPtr<UMHJItem> Key;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Door", meta=(EditCondition="State == EMHJRotatingDoorState::RDS_Locked"))
@@ -88,9 +96,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 	TObjectPtr<UCurveFloat> Curve;
 	
+	UPROPERTY(BlueprintAssignable, Category = "Door")
+	FMHJRotatingDoorUnlockedSignature OnUnlocked;
+	UPROPERTY(BlueprintAssignable, Category = "Door")
+	FMHJRotatingDoorLockedSignature OnLocked;
+	UPROPERTY(BlueprintAssignable, Category = "Door")
+	FMHJRotatingDoorLockedSignature OnBarred;
+	UPROPERTY(BlueprintAssignable, Category = "Door")
+	FMHJRotatingDoorOpenedSignature OnOpened;
+	UPROPERTY(BlueprintAssignable, Category = "Door")
+	FMHJRotatingDoorClosedSignature OnClosed;
+	
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta=(AllowPrivateAccess=true))
-	TObjectPtr<UBoxComponent> Collider;
+	TObjectPtr<USceneComponent> RootPivot;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta=(AllowPrivateAccess=true))
 	TObjectPtr<USceneComponent> Pivot;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta=(AllowPrivateAccess=true))

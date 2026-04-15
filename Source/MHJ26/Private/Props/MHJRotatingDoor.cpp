@@ -4,13 +4,13 @@
 #include "Props/MHJRotatingDoor.h"
 
 #include "Components/ArrowComponent.h"
-#include "Components/BoxComponent.h"
 #include "Components/TimelineComponent.h"
 #include "Inventory/MHJInventoryComponent.h"
+#include "Inventory/MHJItem.h"
 #include "Kismet/GameplayStatics.h"
 
 
-FName AMHJRotatingDoor::ColliderComponentName("ColliderComp");
+FName AMHJRotatingDoor::RootPivotComponentName("RootPivotComp");
 FName AMHJRotatingDoor::PivotComponentName("PivotComp");
 FName AMHJRotatingDoor::DoorMeshComponentName("DoorMeshComp");
 FName AMHJRotatingDoor::DoorTimelineComponentName("DoorTimelineComp");
@@ -35,11 +35,11 @@ AMHJRotatingDoor::AMHJRotatingDoor()
 	OpenDuration = 0.5f;
 	CloseDuration = 0.3f;
 	
-	Collider = CreateDefaultSubobject<UBoxComponent>(ColliderComponentName);
-	SetRootComponent(Collider);
+	RootPivot = CreateDefaultSubobject<USceneComponent>(RootPivotComponentName);
+	SetRootComponent(RootPivot);
 	
 	Pivot = CreateDefaultSubobject<USceneComponent>(PivotComponentName);
-	Pivot->SetupAttachment(Collider);
+	Pivot->SetupAttachment(RootPivot);
 	
 	DoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(DoorMeshComponentName);
 	DoorMesh->SetupAttachment(Pivot);
@@ -74,9 +74,11 @@ void AMHJRotatingDoor::PostInitializeComponents()
 	case EMHJRotatingDoorState::RDS_Closed:
 	case EMHJRotatingDoorState::RDS_Locked:
 	case EMHJRotatingDoorState::RDS_Barred:
+		DoorTimeline->SetNewTime(0.0f);
 		Pivot->SetRelativeRotation(ClosedRotation);
 		break;
 	case EMHJRotatingDoorState::RDS_Opened:
+		DoorTimeline->SetNewTime(1.0f);
 		Pivot->SetRelativeRotation(OpenedRotation);
 		break;
 	}
@@ -172,32 +174,47 @@ void AMHJRotatingDoor::FinalizeInteraction_Implementation(AActor* Subject, int32
 		if (State == EMHJRotatingDoorState::RDS_Opened)
 		{
 			Close();
+			if (PartnerDoor)
+			{
+				PartnerDoor->Close();
+			}
 		}
 		else if (State == EMHJRotatingDoorState::RDS_Closed)
 		{
 			Open();
+			if (PartnerDoor && PartnerDoor->CanOpen())
+			{
+				PartnerDoor->Open();
+			}
 		}
 	}
 }
 
 FText AMHJRotatingDoor::GetMessage_Implementation(AActor* Subject, int32 InteractionResult) const
 {
+	FText Result = FText::GetEmpty();
 	switch (InteractionResult)
 	{
 	case 1:
 		if (State == EMHJRotatingDoorState::RDS_Locked)
 		{
-			return Key == nullptr ? LockedMessage : KeyLockedMessage;
+			Result = Key == nullptr ? LockedMessage : KeyLockedMessage;
 		}
-		if (State == EMHJRotatingDoorState::RDS_Barred)
+		else if (State == EMHJRotatingDoorState::RDS_Barred)
 		{
-			return BarredMessage;
+			Result = BarredMessage;
 		}
+		break;
 	case 2:
-		return UnlockedMessage;
+		Result = UnlockedMessage;
+		break;
 	default:
-		return FText::GetEmpty();
+		break;
 	}
+	
+	FFormatNamedArguments Arguments;
+	Arguments.Add("ItemName", Key ? Key->GetDisplayName() : FText::GetEmpty());
+	return FText::Format(Result, Arguments);
 }
 
 void AMHJRotatingDoor::MakeOpened()
@@ -207,6 +224,7 @@ void AMHJRotatingDoor::MakeOpened()
 	State = EMHJRotatingDoorState::RDS_Opened;
 	Pivot->SetRelativeRotation(OpenedRotation);
 	DoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Key = nullptr;
 }
 
 void AMHJRotatingDoor::MakeClosed()
@@ -216,6 +234,7 @@ void AMHJRotatingDoor::MakeClosed()
 	State = EMHJRotatingDoorState::RDS_Closed;
 	Pivot->SetRelativeRotation(ClosedRotation);
 	DoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Key = nullptr;
 }
 
 void AMHJRotatingDoor::Unlock()
@@ -231,6 +250,8 @@ void AMHJRotatingDoor::Unlock()
 	}
 	State = EMHJRotatingDoorState::RDS_Closed;
 	Key = nullptr;
+	
+	OnUnlocked.Broadcast();
 }
 
 void AMHJRotatingDoor::Lock(UMHJItem* Item)
@@ -238,9 +259,16 @@ void AMHJRotatingDoor::Lock(UMHJItem* Item)
 	DoorTimeline->Stop();
 	DoorTimeline->SetNewTime(0.0f);
 	Key = Item;
+	
+	if (LockedSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), LockedSound, GetActorLocation());
+	}
 	State = EMHJRotatingDoorState::RDS_Locked;
 	Pivot->SetRelativeRotation(ClosedRotation);
 	DoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	
+	OnLocked.Broadcast();
 }
 
 void AMHJRotatingDoor::Bar()
@@ -250,6 +278,9 @@ void AMHJRotatingDoor::Bar()
 	State = EMHJRotatingDoorState::RDS_Barred;
 	Pivot->SetRelativeRotation(ClosedRotation);
 	DoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Key = nullptr;
+	
+	OnBarred.Broadcast();
 }
 
 void AMHJRotatingDoor::Open()
@@ -269,6 +300,8 @@ void AMHJRotatingDoor::Open()
 	DoorTimeline->SetPlayRate(1.0f / OpenDuration);
 	DoorTimeline->Play();
 	DoorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	OnOpened.Broadcast();
 }
 
 void AMHJRotatingDoor::Close()
@@ -286,6 +319,8 @@ void AMHJRotatingDoor::Close()
 	DoorTimeline->SetPlayRate(1.0f / CloseDuration);
 	DoorTimeline->Reverse();
 	DoorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	OnClosed.Broadcast();
 }
 
 void AMHJRotatingDoor::TimelineFloat(float Alpha)
