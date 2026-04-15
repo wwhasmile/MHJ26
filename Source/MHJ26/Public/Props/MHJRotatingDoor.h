@@ -77,8 +77,6 @@ public:
 	FRotator OpenedRotation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Door")
 	FRotator ClosedRotation;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
-	FVector OutsideVector;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", meta = (ClampMin=0.0f, UIMin=0.0f, ForceUnits=Second))
 	float OpenDuration;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", meta = (ClampMin=0.0f, UIMin=0.0f, ForceUnits=Second))
