@@ -105,8 +105,8 @@ void AMHJRotatingDoor::OnConstruction(const FTransform& Transform)
 	}
 	
 #if WITH_EDITORONLY_DATA
-	DirectionArrow->SetRelativeLocation(Direction * DirectionArrow->ArrowLength * DirectionArrow->ArrowSize);
-	DirectionArrow->SetRelativeRotation((-Direction).Rotation());
+	DirectionArrow->SetWorldLocation(GetActorLocation() + Direction * DirectionArrow->ArrowLength * DirectionArrow->ArrowSize);
+	DirectionArrow->SetWorldRotation((-Direction).Rotation());
 #endif
 }
 
