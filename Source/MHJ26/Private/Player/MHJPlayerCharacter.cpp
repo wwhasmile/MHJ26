@@ -11,13 +11,14 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Engine/DamageEvents.h"
-#include "Kismet/GameplayStatics.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 const FString AMHJPlayerCharacter::PlayerCharacterName("PlayerCharacter");
 
 const FName AMHJPlayerCharacter::FirstPersonCameraComponentName("FPCameraComp");
 const FName AMHJPlayerCharacter::FirstPersonInteractionComponentName("FPInteractionComp");
 const FName AMHJPlayerCharacter::InventoryComponentName("InventoryComp");
+const FName AMHJPlayerCharacter::StimuliSourceComponentName("StimuliSourceComp");
 
 const FName AMHJPlayerCharacter::FirstPersonCameraSocketName("CameraSocket");
 
@@ -40,6 +41,10 @@ AMHJPlayerCharacter::AMHJPlayerCharacter(const FObjectInitializer& ObjectInitial
 	FirstPersonInteraction->SetupAttachment(FirstPersonCamera);
 	
 	Inventory = CreateDefaultSubobject<UMHJInventoryComponent>(InventoryComponentName);
+	
+	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(StimuliSourceComponentName);
+	StimuliSource->bAutoRegister = true;
+	StimuliSource->bAutoActivate = true;
 	
 	if (UMHJCharacterMovementComponent* MovementComponent = GetCharacterMovement<UMHJCharacterMovementComponent>())
 	{
@@ -190,6 +195,7 @@ float AMHJPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 			FirstPersonInteraction->Deactivate();
 		}
 		
+		StimuliSource->UnregisterFromPerceptionSystem();
 		Death(DamageEvent.DamageTypeClass);
 		OnDeath.Broadcast(DamageEvent.DamageTypeClass);
 		GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &AMHJPlayerCharacter::Decay, PreDecayDelay, false);

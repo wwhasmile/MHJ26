@@ -6,6 +6,7 @@
 #include "KismetTraceUtils.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
+#include "Perception/AISense_Hearing.h"
 
 const FName UMHJAnimNotify_Footstep::SoundSurfaceTypeParameterName("SurfaceType");
 const FName UMHJAnimNotify_Footstep::SoundIsRunningParameterName("bIsRunning");
@@ -65,16 +66,16 @@ void UMHJAnimNotify_Footstep::Notify(USkeletalMeshComponent* MeshComp, UAnimSequ
 	{
 		if (SoundMap.Num() > 0)
 		{
-			EPhysicalSurface SurfaceType = EPhysicalSurface::SurfaceType_Default;
+			EPhysicalSurface SurfaceType = SurfaceType_Default;
 			if (Hit.PhysMaterial.IsValid())
 			{
 				SurfaceType = Hit.PhysMaterial->SurfaceType;
 			}
 			
 			TObjectPtr<USoundBase>* SoundPtr = SoundMap.Find(SurfaceType);
-			if (!SoundPtr && SurfaceType != EPhysicalSurface::SurfaceType_Default)
+			if (!SoundPtr && SurfaceType != SurfaceType_Default)
 			{
-				SoundPtr = SoundMap.Find(EPhysicalSurface::SurfaceType_Default);
+				SoundPtr = SoundMap.Find(SurfaceType_Default);
 			}
 			if (SoundPtr)
 			{
@@ -84,7 +85,7 @@ void UMHJAnimNotify_Footstep::Notify(USkeletalMeshComponent* MeshComp, UAnimSequ
 		
 		if (APawn* Pawn = Cast<APawn>(Owner))
 		{
-			Pawn->MakeNoise(NoiseLoudness, Pawn, Hit.ImpactPoint, NoiseMaxRange);
+			UAISense_Hearing::ReportNoiseEvent(World, Hit.ImpactPoint, NoiseLoudness, Pawn, NoiseMaxRange);
 		}
 	}
 }

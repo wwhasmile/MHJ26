@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/PlayerController.h"
 #include "MHJPlayerController.generated.h"
 
@@ -33,6 +34,11 @@ private:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Widgets", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UMHJMenuWidget> ActiveMenuWidget;
+	
+	FGenericTeamId Team;
+	
+public:
+	AMHJPlayerController();
 	
 protected:
 	virtual void BeginPlay() override;

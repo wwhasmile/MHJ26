@@ -12,6 +12,7 @@ class UCameraComponent;
 class UMHJInteractionComponent;
 class UMHJInventoryComponent;
 class UDamageType;
+class UAIPerceptionStimuliSourceComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMHJPlayerCharacterDeath, TSubclassOf<UDamageType>, DamageType);
 
@@ -29,6 +30,7 @@ public:
 	static const FName FirstPersonCameraComponentName;
 	static const FName FirstPersonInteractionComponentName;
 	static const FName InventoryComponentName;
+	static const FName StimuliSourceComponentName;
 	
 	static const FName FirstPersonCameraSocketName;
 	
@@ -77,6 +79,8 @@ private:
 	TObjectPtr<UMHJInteractionComponent> FirstPersonInteraction;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Inventory", meta=(AllowPrivateAccess=true))
 	TObjectPtr<UMHJInventoryComponent> Inventory;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="AI", meta=(AllowPrivateAccess=true))
+	TObjectPtr<UAIPerceptionStimuliSourceComponent> StimuliSource;
 	
 	uint8 bInCinematic:1;
 	uint8 bDead:1;

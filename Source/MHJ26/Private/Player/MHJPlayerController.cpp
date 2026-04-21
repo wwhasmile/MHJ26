@@ -7,6 +7,11 @@
 
 #include "EnhancedInputComponent.h"
 
+AMHJPlayerController::AMHJPlayerController()
+{
+	Team = FGenericTeamId(1);
+}
+
 void AMHJPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
