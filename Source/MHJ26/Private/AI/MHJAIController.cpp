@@ -33,8 +33,6 @@ AMHJAIController::AMHJAIController()
 	HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
 	HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
 	HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
-
-	AAIController::SetGenericTeamId(FGenericTeamId(2));
 }
 
 void AMHJAIController::OnPossess(APawn* InPawn)
@@ -84,11 +82,16 @@ void AMHJAIController::OnPossess(APawn* InPawn)
 		{
 			PerceptionComponent->SetDominantSense(UAISense_Hearing::StaticClass());
 		}
+		else
+		{
+			PerceptionComponent->SetDominantSense(nullptr);
+		}
 	}
 	else
 	{
 		ControlledCharacter = nullptr;
 	}
+	PerceptionComponent->RequestStimuliListenerUpdate();
 	
 	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AMHJAIController::OnTargetPerceptionUpdated);
 	PerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &AMHJAIController::OnTargetPerceptionForgotten);
@@ -114,6 +117,7 @@ void AMHJAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stim
 	
 	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
 	{
+		BB->ClearValue(NoiseLocationBlackboardKeyName);
 		if (Stimulus.WasSuccessfullySensed())
 		{
 			BB->ClearValue(TargetLastSeenAtBlackboardKeyName);
@@ -124,14 +128,10 @@ void AMHJAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stim
 			Blackboard->ClearValue(TargetBlackboardKeyName);
 			Blackboard->SetValueAsVector(TargetLastSeenAtBlackboardKeyName, Stimulus.StimulusLocation);
 		}
-		return;
 	}
-	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
+	else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
 	{
-		if (Stimulus.WasSuccessfullySensed())
-		{
-			BB->SetValueAsVector(NoiseLocationBlackboardKeyName, Stimulus.StimulusLocation);
-		}
+		BB->SetValueAsVector(NoiseLocationBlackboardKeyName, Stimulus.StimulusLocation);
 	}
 }
 

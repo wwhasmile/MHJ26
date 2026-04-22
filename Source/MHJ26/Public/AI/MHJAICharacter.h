@@ -13,19 +13,19 @@ class MHJ26_API AMHJAICharacter : public AMHJCharacter
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Sight")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI|Sight")
 	bool bEnableSight;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Sight", meta=(ClampMin=0, UIMin=0, ForceUnits="Centimeters", EditCondition="bEnableSight"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI|Sight", meta=(ClampMin=0, UIMin=0, ForceUnits="Centimeters", EditCondition="bEnableSight"))
 	float SightRadius;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Sight", meta=(ClampMin=0, UIMin=0, ForceUnits="Centimeters", EditCondition="bEnableSight"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI|Sight", meta=(ClampMin=0, UIMin=0, ForceUnits="Centimeters", EditCondition="bEnableSight"))
 	float SightLossRadius;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Sight", meta=(ClampMin=0, UIMin=0, ClampMax=90, UIMax=90, ForceUnits="Degrees", EditCondition="bEnableSight"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI|Sight", meta=(ClampMin=0, UIMin=0, ClampMax=90, UIMax=90, ForceUnits="Degrees", EditCondition="bEnableSight"))
 	float PeripheralRange;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Sight", meta=(ClampMin=0, UIMin=0, EditCondition="bEnableSight"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI|Sight", meta=(ClampMin=0, UIMin=0, EditCondition="bEnableSight"))
 	float SightMemory;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Hearing")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI|Hearing")
 	bool bEnableHearing;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Hearing", meta=(ClampMin=0, UIMin=0, ForceUnits="Centimeters", EditCondition="bEnableHearing"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI|Hearing", meta=(ClampMin=0, UIMin=0, ForceUnits="Centimeters", EditCondition="bEnableHearing"))
 	float HearingRange;
 	
 private:

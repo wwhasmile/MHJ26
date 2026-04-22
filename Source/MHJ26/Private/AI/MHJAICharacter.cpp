@@ -14,5 +14,5 @@ AMHJAICharacter::AMHJAICharacter(const FObjectInitializer& ObjectInitializer)
 	PeripheralRange = 90.0f;
 	SightMemory = 0.1f;
 	bEnableHearing = true;
-	HearingRange = 700.0f;
+	HearingRange = 2400.0f;
 }

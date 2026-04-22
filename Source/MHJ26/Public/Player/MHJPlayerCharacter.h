@@ -6,6 +6,7 @@
 #include "Character/MHJCharacter.h"
 #include "MHJPlayerCharacter.generated.h"
 
+struct FInputActionValue;
 class UInputMappingContext;
 class UInputAction;
 class UCameraComponent;
@@ -109,10 +110,11 @@ public:
 	virtual void SpudStoreCustomData_Implementation(const USpudState* State, USpudStateCustomData* CustomData) override;
 	virtual void SpudRestoreCustomData_Implementation(USpudState* State, USpudStateCustomData* CustomData) override;
 	
-protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	
+	virtual void PostInitializeComponents() override;
 	
 	UFUNCTION(BlueprintNativeEvent, Category="Death")
 	void Death(TSubclassOf<UDamageType> DamageType);

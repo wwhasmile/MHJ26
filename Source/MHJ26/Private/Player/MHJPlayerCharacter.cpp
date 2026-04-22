@@ -12,6 +12,8 @@
 #include "EnhancedInputComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Hearing.h"
+#include "Perception/AISense_Sight.h"
 
 const FString AMHJPlayerCharacter::PlayerCharacterName("PlayerCharacter");
 
@@ -43,8 +45,6 @@ AMHJPlayerCharacter::AMHJPlayerCharacter(const FObjectInitializer& ObjectInitial
 	Inventory = CreateDefaultSubobject<UMHJInventoryComponent>(InventoryComponentName);
 	
 	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(StimuliSourceComponentName);
-	StimuliSource->bAutoRegister = true;
-	StimuliSource->bAutoActivate = true;
 	
 	if (UMHJCharacterMovementComponent* MovementComponent = GetCharacterMovement<UMHJCharacterMovementComponent>())
 	{
@@ -201,6 +201,15 @@ float AMHJPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &AMHJPlayerCharacter::Decay, PreDecayDelay, false);
 	}
 	return Damage;
+}
+
+void AMHJPlayerCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	
+	StimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
+	StimuliSource->RegisterForSense(UAISense_Hearing::StaticClass());
+	StimuliSource->RegisterWithPerceptionSystem();
 }
 
 void AMHJPlayerCharacter::Look(const FInputActionValue& Value)

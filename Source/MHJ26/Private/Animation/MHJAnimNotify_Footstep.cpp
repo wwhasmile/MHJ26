@@ -6,7 +6,6 @@
 #include "KismetTraceUtils.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
-#include "Perception/AISense_Hearing.h"
 
 const FName UMHJAnimNotify_Footstep::SoundSurfaceTypeParameterName("SurfaceType");
 const FName UMHJAnimNotify_Footstep::SoundIsRunningParameterName("bIsRunning");
@@ -85,7 +84,7 @@ void UMHJAnimNotify_Footstep::Notify(USkeletalMeshComponent* MeshComp, UAnimSequ
 		
 		if (APawn* Pawn = Cast<APawn>(Owner))
 		{
-			UAISense_Hearing::ReportNoiseEvent(World, Hit.ImpactPoint, NoiseLoudness, Pawn, NoiseMaxRange);
+			Pawn->MakeNoise(NoiseLoudness, Pawn, FVector::ZeroVector, NoiseMaxRange);
 		}
 	}
 }
