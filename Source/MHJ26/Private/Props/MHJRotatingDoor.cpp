@@ -3,17 +3,22 @@
 
 #include "Props/MHJRotatingDoor.h"
 
+#include "NavLinkCustomComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Components/TimelineComponent.h"
 #include "Inventory/MHJInventoryComponent.h"
 #include "Inventory/MHJItem.h"
 #include "Kismet/GameplayStatics.h"
+#include "NavAreas/NavArea_Null.h"
+#include "NavAreas/NavArea_Obstacle.h"
+#include "Navigation/PathFollowingComponent.h"
 
 
 FName AMHJRotatingDoor::RootPivotComponentName("RootPivotComp");
 FName AMHJRotatingDoor::PivotComponentName("PivotComp");
 FName AMHJRotatingDoor::DoorMeshComponentName("DoorMeshComp");
 FName AMHJRotatingDoor::DoorTimelineComponentName("DoorTimelineComp");
+FName AMHJRotatingDoor::SmartLinkComponentName("SmartLinkComp");
 
 FName AMHJRotatingDoor::DoorTimelineAlphaTrackName("Alpha");
 
@@ -46,6 +51,13 @@ AMHJRotatingDoor::AMHJRotatingDoor()
 	DoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	
 	DoorTimeline = CreateDefaultSubobject<UTimelineComponent>(DoorTimelineComponentName);
+	
+	SmartLink = CreateDefaultSubobject<UNavLinkCustomComponent>(SmartLinkComponentName);
+	SmartLink->SetNavigationRelevancy(true);
+	SmartLink->SetMoveReachedLink(this, &AMHJRotatingDoor::NotifySmartLinkReached);
+	SmartLink->SetLinkData(FVector(-100.0f, 0.0f, 0.0f), FVector(100.0f, 0.0f, 0.0f), ENavLinkDirection::BothWays);
+	SmartLink->SetEnabledArea(UNavArea_Obstacle::StaticClass());
+	SmartLink->SetDisabledArea(UNavArea_Null::StaticClass());
 	
 #if WITH_EDITORONLY_DATA
 	DirectionArrow = CreateDefaultSubobject<UArrowComponent>(DirectionArrowComponentName);
@@ -220,9 +232,8 @@ FText AMHJRotatingDoor::GetMessage_Implementation(AActor* Subject, int32 Interac
 void AMHJRotatingDoor::MakeOpened()
 {
 	DoorTimeline->Stop();
-	DoorTimeline->SetNewTime(0.0f);
+	DoorTimeline->SetNewTime(1.0f);
 	State = EMHJRotatingDoorState::RDS_Opened;
-	Pivot->SetRelativeRotation(OpenedRotation);
 	DoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Key = nullptr;
 }
@@ -232,7 +243,6 @@ void AMHJRotatingDoor::MakeClosed()
 	DoorTimeline->Stop();
 	DoorTimeline->SetNewTime(0.0f);
 	State = EMHJRotatingDoorState::RDS_Closed;
-	Pivot->SetRelativeRotation(ClosedRotation);
 	DoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Key = nullptr;
 }
@@ -265,7 +275,6 @@ void AMHJRotatingDoor::Lock(UMHJItem* Item)
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), LockedSound, GetActorLocation());
 	}
 	State = EMHJRotatingDoorState::RDS_Locked;
-	Pivot->SetRelativeRotation(ClosedRotation);
 	DoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	
 	OnLocked.Broadcast();
@@ -276,7 +285,6 @@ void AMHJRotatingDoor::Bar()
 	DoorTimeline->Stop();
 	DoorTimeline->SetNewTime(0.0f);
 	State = EMHJRotatingDoorState::RDS_Barred;
-	Pivot->SetRelativeRotation(ClosedRotation);
 	DoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Key = nullptr;
 	
@@ -323,6 +331,59 @@ void AMHJRotatingDoor::Close()
 	OnClosed.Broadcast();
 }
 
+void AMHJRotatingDoor::NotifySmartLinkReached(UNavLinkCustomComponent* Link, UObject* PathingAgent, const FVector& DestPoint)
+{
+	if (State == EMHJRotatingDoorState::RDS_Opened)
+	{
+		return;
+	}
+	
+	UPathFollowingComponent* PathComp = Cast<UPathFollowingComponent>(PathingAgent);
+	if (!PathComp)
+	{
+		return;
+	}
+	
+	PathComp->PauseMove();
+	
+	AActor* PathOwner = PathComp->GetOwner();
+	AController* ControllerOwner = Cast<AController>(PathOwner);
+	if (!ControllerOwner)
+	{
+		return;
+	}
+	PathOwner = ControllerOwner->GetPawn();
+	
+	PathComp->PauseMove();
+	
+	int32 Result = Execute_Interact(this, PathOwner);
+	if (Result != 0)
+	{
+		PathComp->AbortMove(*this, FPathFollowingResultFlags::Blocked);
+		return;
+	}
+	Execute_FinalizeInteraction(this, PathOwner, Result);
+	FTimerHandle NavDoorOpenTimerHandle;
+	FTimerDelegate NavDoorOpenTimerDelegate;
+	NavDoorOpenTimerDelegate.BindUObject(this, &AMHJRotatingDoor::OnNavDoorOpen, TWeakObjectPtr(PathComp));
+	GetWorld()->GetTimerManager().SetTimer(
+		NavDoorOpenTimerHandle,
+		NavDoorOpenTimerDelegate,
+		OpenDuration,
+		false
+		);
+	
+	PathComp->ResumeMove();
+}
+
+void AMHJRotatingDoor::OnNavDoorOpen(TWeakObjectPtr<UPathFollowingComponent> PathComp) const
+{
+	if (PathComp.IsValid())
+	{
+		PathComp->ResumeMove();
+	}
+}
+
 void AMHJRotatingDoor::TimelineFloat(float Alpha)
 {
 	Pivot->SetRelativeRotation(FQuat::Slerp(ClosedRotation.Quaternion(), OpenedRotation.Quaternion(), Alpha));
@@ -330,5 +391,12 @@ void AMHJRotatingDoor::TimelineFloat(float Alpha)
 
 void AMHJRotatingDoor::TimelineFinished()
 {
-	DoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	if (State == EMHJRotatingDoorState::RDS_Opened)
+	{
+		MakeOpened();
+	}
+	else if (State == EMHJRotatingDoorState::RDS_Closed)
+	{
+		MakeClosed();
+	}
 }

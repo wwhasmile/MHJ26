@@ -3,7 +3,6 @@
 #pragma once
 
 #include "ISpudObject.h"
-#include "GameFramework/Actor.h"
 #include "Interaction/MHJInteractable.h"
 #include "MHJRotatingDoor.generated.h"
 
@@ -11,6 +10,8 @@ class UMHJItem;
 class USceneComponent;
 class UStaticMeshComponent;
 class UTimelineComponent;
+class UNavLinkCustomComponent;
+class UPathFollowingComponent;
 
 #if WITH_EDITORONLY_DATA
 class UArrowComponent;
@@ -41,6 +42,7 @@ public:
 	static FName PivotComponentName;
 	static FName DoorMeshComponentName;
 	static FName DoorTimelineComponentName;
+	static FName SmartLinkComponentName;
 	
 private:
 	static FName DoorTimelineAlphaTrackName;
@@ -112,6 +114,8 @@ private:
 	TObjectPtr<USceneComponent> Pivot;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta=(AllowPrivateAccess=true))
 	TObjectPtr<UStaticMeshComponent> DoorMesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta=(AllowPrivateAccess=true))
+	TObjectPtr<UNavLinkCustomComponent> SmartLink;
 	
 	UPROPERTY()
 	TObjectPtr<UTimelineComponent> DoorTimeline;
@@ -153,6 +157,10 @@ public:
 	FORCEINLINE EMHJRotatingDoorState GetState() const { return State; }
 	
 private:
+	void NotifySmartLinkReached(UNavLinkCustomComponent* Link, UObject* PathingAgent, const FVector& DestPoint);
+	
+	void OnNavDoorOpen(TWeakObjectPtr<UPathFollowingComponent> PathComp) const;
+	
 	UFUNCTION()
 	void TimelineFloat(float Alpha);
 
