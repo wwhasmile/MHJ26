@@ -8,9 +8,19 @@ public class MHJ26 : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "EnhancedInput", "Core", "CoreUObject", "Engine", "InputCore", "PhysicsCore", "AIModule" });
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"EnhancedInput",
+			"Core",
+			"CoreUObject",
+			"Engine",
+			"InputCore",
+			"PhysicsCore",
+			"AIModule",
+			"SPUD"
+		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "UMG", "SlateCore", "Slate", "AnimGraphRuntime", "SPUD" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "UMG", "SlateCore", "Slate", "AnimGraphRuntime", "NavigationSystem" });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
