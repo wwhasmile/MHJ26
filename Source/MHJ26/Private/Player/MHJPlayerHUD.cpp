@@ -10,6 +10,36 @@ AMHJPlayerHUD::AMHJPlayerHUD()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
+void AMHJPlayerHUD::EnableHUD()
+{
+	if (!WidgetInstance)
+	{
+		return;
+	}
+
+	if (WidgetInstance->IsInViewport())
+	{
+		return;
+	}
+	
+	WidgetInstance->AddToViewport();
+}
+
+void AMHJPlayerHUD::DisableHUD()
+{
+	if (!WidgetInstance)
+	{
+		return;
+	}
+
+	if (!WidgetInstance->IsInViewport())
+	{
+		return;
+	}
+	
+	WidgetInstance->RemoveFromParent();
+}
+
 void AMHJPlayerHUD::BeginPlay()
 {
 	Super::BeginPlay();
@@ -17,12 +47,8 @@ void AMHJPlayerHUD::BeginPlay()
 	if (IsValid(WidgetClass))
 	{
 		WidgetInstance = CreateWidget<UUserWidget>(GetOwningPlayerController(), WidgetClass);
-		if (WidgetInstance)
-		{
-			WidgetInstance->AddToViewport();
-		}
+		EnableHUD();
 	}
-	
 }
 
 void AMHJPlayerHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)

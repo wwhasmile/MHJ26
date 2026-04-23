@@ -25,6 +25,12 @@ private:
 public:
 	AMHJPlayerHUD();
 	
+	UFUNCTION(BlueprintCallable, Exec, Category = "HUD")
+	void EnableHUD();
+	
+	UFUNCTION(BlueprintCallable, Exec, Category = "HUD")
+	void DisableHUD();
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

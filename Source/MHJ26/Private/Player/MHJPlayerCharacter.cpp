@@ -14,6 +14,7 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Hearing.h"
 #include "Perception/AISense_Sight.h"
+#include "Player/MHJPlayerHUD.h"
 
 const FString AMHJPlayerCharacter::PlayerCharacterName("PlayerCharacter");
 
@@ -82,6 +83,11 @@ void AMHJPlayerCharacter::EnterCinematic()
 	
 	if (APlayerController* PlayerController = CastChecked<APlayerController>(GetController()))
 	{
+		if (AMHJPlayerHUD* HUD = Cast<AMHJPlayerHUD>(PlayerController->GetHUD()))
+		{
+			HUD->DisableHUD();
+		}
+		
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 		
 		Subsystem->ClearAllMappings();
@@ -109,6 +115,11 @@ void AMHJPlayerCharacter::EnterGameplay()
 	
 	if (APlayerController* PlayerController = CastChecked<APlayerController>(GetController()))
 	{
+		if (AMHJPlayerHUD* HUD = Cast<AMHJPlayerHUD>(PlayerController->GetHUD()))
+		{
+			HUD->EnableHUD();
+		}
+		
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 		
 		APlayerCameraManager* PlayerCameraManager = PlayerController->PlayerCameraManager;
@@ -187,6 +198,11 @@ float AMHJPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		{
 			UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 			Subsystem->ClearAllMappings();
+			
+			if (AMHJPlayerHUD* HUD = Cast<AMHJPlayerHUD>(PlayerController->GetHUD()))
+			{
+				HUD->DisableHUD();
+			}
 		}
 		
 		bDead = true;
@@ -199,7 +215,9 @@ float AMHJPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		StimuliSource->UnregisterFromSense(UAISense_Hearing::StaticClass());
 		Death(DamageEvent.DamageTypeClass);
 		OnDeath.Broadcast(DamageEvent.DamageTypeClass);
-		GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &AMHJPlayerCharacter::Decay, PreDecayDelay, false);
+		FTimerDelegate DecayTimerDelegate;
+		DecayTimerDelegate.BindUObject(this, &AMHJPlayerCharacter::Decay);
+		GetWorldTimerManager().SetTimer(DecayTimerHandle, DecayTimerDelegate, PreDecayDelay, false);
 	}
 	return Damage;
 }
