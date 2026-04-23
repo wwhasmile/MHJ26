@@ -130,6 +130,7 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 	
+	virtual bool CanInteract_Implementation(AActor* Subject) const override;
 	virtual int32 Interact_Implementation(AActor* Subject) override;
 	virtual void FinalizeInteraction_Implementation(AActor* Subject, int32 InteractionResult) override;
 	virtual FText GetMessage_Implementation(AActor* Subject, int32 InteractionResult) const override;
