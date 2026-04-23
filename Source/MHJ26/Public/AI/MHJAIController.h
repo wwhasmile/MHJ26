@@ -38,6 +38,8 @@ private:
 	UPROPERTY()
 	TObjectPtr<UAISenseConfig_Hearing> HearingConfig;
 	
+	FTimerHandle EnemyLostTimerHandle;
+	
 public:
 	AMHJAIController();
 	
@@ -52,6 +54,6 @@ private:
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 	
 	UFUNCTION()
-	void OnTargetPerceptionForgotten(AActor* Actor);
+	void OnEnemyLost(AActor* Actor);
 	
 };

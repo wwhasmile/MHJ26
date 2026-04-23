@@ -195,7 +195,8 @@ float AMHJPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 			FirstPersonInteraction->Deactivate();
 		}
 		
-		StimuliSource->UnregisterFromPerceptionSystem();
+		StimuliSource->UnregisterFromSense(UAISense_Sight::StaticClass());
+		StimuliSource->UnregisterFromSense(UAISense_Hearing::StaticClass());
 		Death(DamageEvent.DamageTypeClass);
 		OnDeath.Broadcast(DamageEvent.DamageTypeClass);
 		GetWorldTimerManager().SetTimer(DecayTimerHandle, this, &AMHJPlayerCharacter::Decay, PreDecayDelay, false);

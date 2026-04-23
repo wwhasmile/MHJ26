@@ -6,9 +6,9 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
-#include "Runtime/AIModule/Classes/BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BehaviorTree.h"
 
-#include "Runtime/AIModule/Classes/Perception/AIPerceptionComponent.h"
+#include "Perception/AIPerceptionComponent.h"
 
 
 FName AMHJAIController::AIPerceptionComponentName("AIPerceptionComp");
@@ -33,6 +33,7 @@ AMHJAIController::AMHJAIController()
 	HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
 	HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
 	HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
+	HearingConfig->SetMaxAge(5.0f);
 }
 
 void AMHJAIController::OnPossess(APawn* InPawn)
@@ -96,7 +97,6 @@ void AMHJAIController::OnPossess(APawn* InPawn)
 	PerceptionComponent->RequestStimuliListenerUpdate();
 	
 	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AMHJAIController::OnTargetPerceptionUpdated);
-	PerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &AMHJAIController::OnTargetPerceptionForgotten);
 }
 
 void AMHJAIController::OnUnPossess()
@@ -106,11 +106,16 @@ void AMHJAIController::OnUnPossess()
 	ControlledCharacter = nullptr;
 	
 	PerceptionComponent->OnTargetPerceptionUpdated.RemoveDynamic(this, &AMHJAIController::OnTargetPerceptionUpdated);
-	PerceptionComponent->OnTargetPerceptionForgotten.RemoveDynamic(this, &AMHJAIController::OnTargetPerceptionForgotten);
 }
 
 void AMHJAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	
 	UBlackboardComponent* BB = GetBlackboardComponent();
 	if (!BB)
 	{
@@ -122,8 +127,15 @@ void AMHJAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stim
 		BB->ClearValue(NoiseLocationBlackboardKeyName);
 		if (Stimulus.WasSuccessfullySensed())
 		{
+			World->GetTimerManager().ClearTimer(EnemyLostTimerHandle);
 			BB->ClearValue(TargetLastSeenAtBlackboardKeyName);
 			BB->SetValueAsObject(TargetBlackboardKeyName, Actor);
+		}
+		else
+		{
+			FTimerDelegate EnemyLostTimerDelegate;
+			EnemyLostTimerDelegate.BindUObject(this, &AMHJAIController::OnEnemyLost, Actor);
+			World->GetTimerManager().SetTimer(EnemyLostTimerHandle, EnemyLostTimerDelegate, SightConfig->GetMaxAge(), false);
 		}
 	}
 	else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
@@ -132,7 +144,7 @@ void AMHJAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stim
 	}
 }
 
-void AMHJAIController::OnTargetPerceptionForgotten(AActor* Actor)
+void AMHJAIController::OnEnemyLost(AActor* Actor)
 {
 	UBlackboardComponent* BB = GetBlackboardComponent();
 	if (!BB)
@@ -140,6 +152,14 @@ void AMHJAIController::OnTargetPerceptionForgotten(AActor* Actor)
 		return;
 	}
 	
+	if (Actor)
+	{
+		BB->SetValueAsVector(TargetLastSeenAtBlackboardKeyName, Actor->GetActorLocation());
+	}
+	else
+	{
+		BB->ClearValue(TargetLastSeenAtBlackboardKeyName);
+	}
+	
 	BB->ClearValue(TargetBlackboardKeyName);
-	BB->SetValueAsVector(TargetLastSeenAtBlackboardKeyName, Actor->GetActorLocation());
 }
