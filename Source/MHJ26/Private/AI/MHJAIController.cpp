@@ -43,9 +43,11 @@ void AMHJAIController::OnPossess(APawn* InPawn)
 	{
 		if (UBehaviorTree* BehaviorTree = ControlledCharacter->GetBehaviorTree())
 		{
-			UBlackboardComponent* BB = GetBlackboardComponent();
-			UseBlackboard(BehaviorTree->BlackboardAsset, BB);
-			RunBehaviorTree(BehaviorTree);
+			UBlackboardComponent* BB;
+			if (UseBlackboard(BehaviorTree->BlackboardAsset, BB))
+			{
+				RunBehaviorTree(BehaviorTree);
+			}
 		}
 		
 		if (ControlledCharacter->bEnableSight)
@@ -123,11 +125,6 @@ void AMHJAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stim
 			BB->ClearValue(TargetLastSeenAtBlackboardKeyName);
 			BB->SetValueAsObject(TargetBlackboardKeyName, Actor);
 		}
-		else
-		{
-			Blackboard->ClearValue(TargetBlackboardKeyName);
-			Blackboard->SetValueAsVector(TargetLastSeenAtBlackboardKeyName, Stimulus.StimulusLocation);
-		}
 	}
 	else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
 	{
@@ -143,6 +140,6 @@ void AMHJAIController::OnTargetPerceptionForgotten(AActor* Actor)
 		return;
 	}
 	
-	BB->ClearValue(TargetLastSeenAtBlackboardKeyName);
 	BB->ClearValue(TargetBlackboardKeyName);
+	BB->SetValueAsVector(TargetLastSeenAtBlackboardKeyName, Actor->GetActorLocation());
 }
