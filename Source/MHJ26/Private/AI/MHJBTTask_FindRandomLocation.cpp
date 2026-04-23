@@ -3,11 +3,13 @@
 
 #include "AI/MHJBTTask_FindRandomLocation.h"
 
+#include "AIController.h"
 #include "NavigationSystem.h"
 
 UMHJBTTask_FindRandomLocation::UMHJBTTask_FindRandomLocation()
 {
 	Radius = 15000.0f;
+	LocationKey.AddVectorFilter(this, GET_MEMBER_NAME_CHECKED(UMHJBTTask_FindRandomLocation, LocationKey));
 }
 
 EBTNodeResult::Type UMHJBTTask_FindRandomLocation::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -24,12 +26,23 @@ EBTNodeResult::Type UMHJBTTask_FindRandomLocation::ExecuteTask(UBehaviorTreeComp
 		return EBTNodeResult::Failed;
 	}
 	
-	const FVector Origin = OwnerComp.GetOwner()->GetActorLocation();
-	FNavLocation Result;
-	if (NavSys->GetRandomPointInNavigableRadius(Origin, Radius.GetValue(BB), Result))
+	AActor* OwnerActor = OwnerComp.GetOwner();
+	if (AAIController* Controller = OwnerComp.GetAIOwner())
 	{
-		BB->SetValueAsVector(LocationKey.SelectedKeyName, Result.Location);
-		return EBTNodeResult::Succeeded;
+		OwnerActor = Controller->GetPawn();
 	}
-	return EBTNodeResult::Failed;
+	if (!OwnerActor)
+	{
+		return EBTNodeResult::Failed;
+	}
+	const FVector Origin = OwnerActor->GetActorLocation();
+	
+	FNavLocation Result;
+	if (!NavSys->GetRandomPointInNavigableRadius(Origin, Radius.GetValue(BB), Result))
+	{
+		return EBTNodeResult::Failed;
+	}
+	
+	BB->SetValueAsVector(LocationKey.SelectedKeyName, Result.Location);
+	return EBTNodeResult::Succeeded;
 }
