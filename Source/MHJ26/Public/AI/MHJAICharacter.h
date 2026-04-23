@@ -2,13 +2,14 @@
 
 #pragma once
 
+#include "ISpudObject.h"
 #include "Character/MHJCharacter.h"
 #include "MHJAICharacter.generated.h"
 
 class UBehaviorTree;
 
 UCLASS(Abstract)
-class MHJ26_API AMHJAICharacter : public AMHJCharacter
+class MHJ26_API AMHJAICharacter : public AMHJCharacter, public ISpudObject
 {
 	GENERATED_BODY()
 
@@ -31,6 +32,9 @@ public:
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI", meta=(AllowPrivateAccess=true))
 	TObjectPtr<UBehaviorTree> BehaviorTree;
+	
+	UPROPERTY()
+	FGuid SpudGuid;
 	
 public:
 	AMHJAICharacter(const FObjectInitializer& ObjectInitializer);
