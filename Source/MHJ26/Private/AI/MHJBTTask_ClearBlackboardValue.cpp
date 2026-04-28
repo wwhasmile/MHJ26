@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Hasmile
+// Copyright (c) 2026 HasmileHasmile
 
 
 #include "AI/MHJBTTask_ClearBlackboardValue.h"

@@ -1,5 +1,4 @@
-# Game for The 2026 Mascot Horror Jam
-Theme - Childhood Horror
+# Cancelled game for The 2026 Mascot Horror Jam. Theme was "Childhood Horror".
 
 ## Third party attributions
 ### Plugins:
