@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "BehaviorTree/BehaviorTreeTypes.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 #include "MHJAIController.generated.h"
@@ -17,7 +16,7 @@ UCLASS(Abstract)
 class MHJ26_API AMHJAIController : public AAIController
 {
 	GENERATED_BODY()
-
+	
 public:
 	static FName AIPerceptionComponentName;
 	static FName SightConfigName;
@@ -44,6 +43,9 @@ public:
 	AMHJAIController();
 	
 	FORCEINLINE AMHJAICharacter* GetControlledCharacter() const { return ControlledCharacter; }
+	
+	void StartThinking();
+	void StopThinking();
 	
 protected:
 	virtual void OnPossess(APawn* InPawn) override;

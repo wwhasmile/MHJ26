@@ -33,7 +33,7 @@ AMHJAIController::AMHJAIController()
 	HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
 	HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
 	HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
-	HearingConfig->SetMaxAge(5.0f);
+	HearingConfig->SetMaxAge(0.1f);
 }
 
 void AMHJAIController::OnPossess(APawn* InPawn)
@@ -89,11 +89,21 @@ void AMHJAIController::OnPossess(APawn* InPawn)
 		{
 			PerceptionComponent->SetDominantSense(nullptr);
 		}
+		
+		if (ControlledCharacter->bAutoStartThinking)
+		{
+			StartThinking();
+		}
+		else
+		{
+			StopThinking();
+		}
 	}
 	else
 	{
 		ControlledCharacter = nullptr;
 	}
+	
 	PerceptionComponent->RequestStimuliListenerUpdate();
 	
 	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AMHJAIController::OnTargetPerceptionUpdated);
@@ -162,4 +172,18 @@ void AMHJAIController::OnEnemyLost(AActor* Actor)
 	}
 	
 	BB->ClearValue(TargetBlackboardKeyName);
+}
+
+void AMHJAIController::StartThinking()
+{
+	BrainComponent->StartLogic();
+	PerceptionComponent->SetSenseEnabled(UAISense_Sight::StaticClass(), true);
+	PerceptionComponent->SetSenseEnabled(UAISense_Hearing::StaticClass(), true);
+}
+
+void AMHJAIController::StopThinking()
+{
+	BrainComponent->StopLogic("External thinking disabled");
+	PerceptionComponent->SetSenseEnabled(UAISense_Sight::StaticClass(), false);
+	PerceptionComponent->SetSenseEnabled(UAISense_Hearing::StaticClass(), false);
 }

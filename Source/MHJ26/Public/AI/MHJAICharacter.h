@@ -14,6 +14,8 @@ class MHJ26_API AMHJAICharacter : public AMHJCharacter, public ISpudObject
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	bool bAutoStartThinking;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI|Sight")
 	bool bEnableSight;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI|Sight", meta=(ClampMin=0, UIMin=0, ForceUnits="Centimeters", EditCondition="bEnableSight"))
@@ -39,5 +41,11 @@ private:
 public:
 	AMHJAICharacter(const FObjectInitializer& ObjectInitializer);
 	
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void StartThinking();
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void StopThinking();
+	
 	FORCEINLINE UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
+	
 };
